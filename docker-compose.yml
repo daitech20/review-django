@@ -1,0 +1,52 @@
+version: "3.9"
+services:
+
+  db:
+    image: mariadb:10.3.31
+    container_name: review-db
+    command: >
+          bash -c "
+          chmod 644 /etc/mysql/conf.d/*.cnf
+          && /docker-entrypoint.sh mysqld
+          "
+    environment:
+      - MARIADB_ROOT_PASSWORD=${DATABASE_ROOT_PASS}
+      - MARIADB_USER=${DATABASE_USER}
+      - MARIADB_PASSWORD=${DATABASE_PASS}
+      - MARIADB_DATABASE=${DATABASE_NAME}
+    volumes:
+      - web_server_data:/var/lib/mysql:delegated
+      - ./.docker/mysql/db_conf.d:/etc/mysql/conf.d:cached
+    ports:
+      - ${HOST_DB_PORT:-3306}:3306
+
+  server:
+    build:
+      context: .
+    image: review/server
+    container_name: review-server
+    volumes:
+      - ./:/usr/src/app
+      - ./.docker/apache/sites-enabled:/etc/apache2/sites-enabled:cached
+    ports:
+      - ${HOST_SERVER_PORT}:8000
+      - ${HOST_DASHBOARD_CLIENT_PORT}:3000
+      - ${HOST_STATIC_FILE_PORT}:8081
+    environment:
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASS=${DATABASE_PASS}
+      - WEB_STATIC_URL=${WEB_STATIC_URL}
+    command: >
+          bash -c "
+          ln -sf /usr/src/app/.docker/apache/ports.conf /etc/apache2/ports.conf
+          && ln -sf /usr/src/app/.docker/apache/apache2.conf /etc/apache2/apache2.conf
+          && service apache2 start
+          && python server/manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - db
+    tty: true
+
+volumes:
+  web_server_data:
