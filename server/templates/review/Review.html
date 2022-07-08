@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load socialaccount %}
+    {% load static %}
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SalonAz</title>
+    <title>{{ store.store_name }}</title>
     <link rel="stylesheet" href="{% static 'review/assets/css/main.css' %}">
     <script src="{% static 'review/assets/js/main.js' %}"></script>
 </head>
@@ -13,39 +15,48 @@
         <div class="review-container__wrapper">
             <div class="review-container">
                 <div class="review-header">
-                    <img class="review-header-img" src="./assets/img/nailspa.png" alt="nailspa">
+                    <img class="review-header-img" src="{% static 'review/assets/img/nailspa.png' %}" alt="nailspa">
                 </div>
+                {% if user.is_authenticated %}
+                    <p>Welcome, {{ user.username }} !</p>
+                {% endif %}
                 <span class="review-content">
                     Hi,  How would you rate your most recent service?
                 </span>
                 <div class="rating-container">
                     <div class="star-container">
                         <div class="star">
-                            <img class="outline star1" src="./assets/img/star_outline.svg" alt="">
+                            <img class="outline star1" src="{% static 'review/assets/img/star_outline.svg' %}" alt="">
                         </div>
                         <div class="star">
-                            <img class="outline star2" src="./assets/img/star_outline.svg" alt="">
+                            <img class="outline star2" src="{% static 'review/assets/img/star_outline.svg' %}" alt="">
                         </div>
                         <div class="star">
-                            <img class="outline star3" src="./assets/img/star_outline.svg" alt="">
+                            <img class="outline star3" src="{% static 'review/assets/img/star_outline.svg' %}" alt="">
                         </div>
                         <div class="star">
-                            <img class="outline star4" src="./assets/img/star_outline.svg" alt="">
+                            <img class="outline star4" src="{% static 'review/assets/img/star_outline.svg' %}" alt="">
                         </div>
                         <div class="star">
-                            <img class="outline star5" src="./assets/img/star_outline.svg" alt="">
+                            <img class="outline star5" src="{% static 'review/assets/img/star_outline.svg' %}" alt="">
                         </div>
                     </div>
                 </div>
-                <form class="complain-container">
-                    <textarea class="review-area" placeholder="Write review to help us better"></textarea>
-                    <input class="review-input"  type="text" placeholder="Phone number (optional)">
-                   <button onclick="test()" class="btn-submit">Submit</button>
+                <form action="{% url 'review:ReviewPage' store.store_name %}" class="complain-container" method="post" enctype="multipart/form-data">
+<!--                    <textarea class="review-area" placeholder="Write review to help us better"></textarea>-->
+<!--                    <input class="review-input"  type="text" placeholder="Phone number (optional)">-->
+                    {% csrf_token %}
+                    {{form.review_content}}
+                    {{form.phone_number}}
+                    {{ form.review_score  }}
+                   <button type="submit" onclick="test()" class="btn-submit" name="btnform">Submit</button>
                 </form>
 
-                <div class="review-google-container">
-                    <button class="login-google-button">
-                        <img class="google-img" src="./assets/img/google.svg" alt="google">
+                <form action="{% url 'review:ReviewPage' store.store_name %}" class="review-google-container" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form2.review_score  }}
+                    <button class="login-google-button" type="submit" name="btnform2" >
+                        <img class="google-img" src="{% static 'review/assets/img/google.svg' %}" alt="google">
                         <span class="login-text">Sign in with Google</span>
                     </button>
                     <span class="review-google-description"> Sign in with your Google Account to write a
@@ -53,7 +64,7 @@
                          Your review enters you in for a chance to win a
                         <span class="bold-text underline-text highlight-text item">$250 gift card</span>
                     </span>
-                </div>
+                </form>
             </div>
         </div>
     </div>
@@ -72,62 +83,56 @@
    star1.addEventListener("click", function(event){
         form_one_three.style.display = 'flex'
         form_four_five.style.display = 'none'
-        star1.src = './assets/img/star_fill.svg'
-        if((star4.src = './assets/img/star_fill.svg') &&  (star5.src = './assets/img/star_fill.svg') && (star3.src = './assets/img/star_fill.svg') && ( star2.src = './assets/img/star_fill.svg')){
-            star2.src = './assets/img/star_outline.svg'
-            star3.src = './assets/img/star_outline.svg'
-            star4.src = './assets/img/star_outline.svg'
-            star5.src = './assets/img/star_outline.svg'
-        }
+        star1.src = '{% static 'review/assets/img/star_fill.svg' %}'
+        star2.src = '{% static 'review/assets/img/star_outline.svg' %}'
+        star3.src = '{% static 'review/assets/img/star_outline.svg' %}'
+        star4.src = '{% static 'review/assets/img/star_outline.svg' %}'
+        star5.src = '{% static 'review/assets/img/star_outline.svg' %}'
+        document.getElementById("id_review_score1").value = "1";
     });
 
     star2.addEventListener("click", function(event){
         form_one_three.style.display = 'flex'
         form_four_five.style.display = 'none'
-        star1.src = './assets/img/star_fill.svg'
-        star2.src = './assets/img/star_fill.svg'
-        if((star4.src = './assets/img/star_fill.svg') &&  (star5.src = './assets/img/star_fill.svg') && (star3.src = './assets/img/star_fill.svg')){
-            star3.src = './assets/img/star_outline.svg'
-            star4.src = './assets/img/star_outline.svg'
-            star5.src = './assets/img/star_outline.svg'
-        }
+        star1.src = '{% static 'review/assets/img/star_fill.svg' %}'
+        star2.src = '{% static 'review/assets/img/star_fill.svg' %}'
+        star3.src = '{% static 'review/assets/img/star_outline.svg' %}'
+        star4.src = '{% static 'review/assets/img/star_outline.svg' %}'
+        star5.src = '{% static 'review/assets/img/star_outline.svg' %}'
+        document.getElementById("id_review_score1").value = "2";
     });
 
     star3.addEventListener("click", function(event){
         form_one_three.style.display = 'flex'
         form_four_five.style.display = 'none'
-        star3.src = './assets/img/star_fill.svg'
-        star2.src = './assets/img/star_fill.svg'
-        star1.src = './assets/img/star_fill.svg'
-        if((star4.src = './assets/img/star_fill.svg') &&  (star5.src = './assets/img/star_fill.svg')){
-            star4.src = './assets/img/star_outline.svg'
-            star5.src = './assets/img/star_outline.svg'
-        }
-
+        star3.src = '{% static 'review/assets/img/star_fill.svg' %}'
+        star2.src = '{% static 'review/assets/img/star_fill.svg' %}'
+        star1.src = '{% static 'review/assets/img/star_fill.svg' %}'
+        star4.src = '{% static 'review/assets/img/star_outline.svg' %}'
+        star5.src = '{% static 'review/assets/img/star_outline.svg' %}'
+        document.getElementById("id_review_score1").value = "3";
     });
 
     star4.addEventListener("click", function(event){
         form_four_five.style.display = 'flex'
         form_one_three.style.display = 'none'
-        star4.src = './assets/img/star_fill.svg'
-        star3.src = './assets/img/star_fill.svg'
-        star2.src = './assets/img/star_fill.svg'
-        star1.src = './assets/img/star_fill.svg'
-        if((star5.src = './assets/img/star_fill.svg')){
-            star5.src = './assets/img/star_outline.svg'
-        }
-
+        star4.src = '{% static 'review/assets/img/star_fill.svg' %}'
+        star3.src = '{% static 'review/assets/img/star_fill.svg' %}'
+        star2.src = '{% static 'review/assets/img/star_fill.svg' %}'
+        star1.src = '{% static 'review/assets/img/star_fill.svg' %}'
+        star5.src = '{% static 'review/assets/img/star_outline.svg' %}'
+        document.getElementById("id_review_score2").value = "4";
     });
 
     star5.addEventListener("click", function(event){
         form_four_five.style.display = 'flex'
         form_one_three.style.display = 'none'
-        star5.src = './assets/img/star_fill.svg'
-        star4.src = './assets/img/star_fill.svg'
-        star3.src = './assets/img/star_fill.svg'
-        star2.src = './assets/img/star_fill.svg'
-        star1.src = './assets/img/star_fill.svg'
-
+        star5.src = '{% static 'review/assets/img/star_fill.svg' %}'
+        star4.src = '{% static 'review/assets/img/star_fill.svg' %}'
+        star3.src = '{% static 'review/assets/img/star_fill.svg' %}'
+        star2.src = '{% static 'review/assets/img/star_fill.svg' %}'
+        star1.src = '{% static 'review/assets/img/star_fill.svg' %}'
+        document.getElementById("id_review_score2").value = "5";
     });
 
 </script>
