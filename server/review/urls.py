@@ -1,6 +1,8 @@
 from django.urls import path, include
-from .views import Home
+from .views import Home, ReviewPage
 
+app_name = 'review'
 urlpatterns = [
-    path('', Home , name="Home")
+    path('abc', Home , name="Home"),
+    path('review/<str:store_name>/', ReviewPage.as_view(), name="ReviewPage"),
 ]
