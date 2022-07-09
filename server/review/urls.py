@@ -1,8 +1,9 @@
 from django.urls import path, include
-from .views import Home, ReviewPage
+from .views import Home, ReviewPage, LoginSuccess
 
 app_name = 'review'
 urlpatterns = [
-    path('abc', Home , name="Home"),
+    path('', Home , name="Home"),
+    path('success/', LoginSuccess, name="LoginSuccess"),
     path('review/<str:store_name>/', ReviewPage.as_view(), name="ReviewPage"),
 ]
