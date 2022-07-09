@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-b^h_9^-%96o!g0=o+4+7t+3tu*47749)pvn95$gg3#1(r)*!x%'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -148,7 +148,7 @@ AUTHENTICATION_BACKENDS = [
 
 # Setting google auth
 SITE_ID = 1
-LOGIN_REDIRECT_URL = 'https://www.google.com/maps/place/Kimochi+coffee/@11.9419437,108.4646315,17z/data=!4m12!1m6!3m5!1s0x317113336cd76769:0xa1e1ca6a32cee591!2sKimochi+coffee!8m2!3d11.9419428!4d108.4668191!3m4!1s0x317113336cd76769:0xa1e1ca6a32cee591!8m2!3d11.9419428!4d108.4668191?hl=vi-VN'
+LOGIN_REDIRECT_URL = '/success'
 LOGOUT_REDIRECT_URL = '/'
 
 # Additional configuration settings

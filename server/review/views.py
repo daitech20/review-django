@@ -87,3 +87,6 @@ class ReviewPage(View):
 def Dashboard(request, any):
     return render(request, 'DashboardClient.html')
 
+def LoginSuccess(View):
+    def get(self, request):
+        return HttpResponse("ok")
