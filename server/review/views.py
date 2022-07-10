@@ -46,7 +46,6 @@ class ReviewPage(View):
                 obj = form.save(commit=False)
                 review = Review.objects.create(store=store, review_content=obj.review_content, phone_number=obj.phone_number, review_score=obj.review_score)
                 review.save()
-                print('bt')
                 data['form'] = form
             else:
                 form = ReviewForm(initial={'review_score': 0})
@@ -54,9 +53,8 @@ class ReviewPage(View):
             form2 = ReviewFormGoogle(request.POST)
             if form2.is_valid():
                 obj = form2.save(commit=False)
-                review = Review.objects.create(store=store, review_score=obj.review_score)
-                review.save()
-                print('google')
+                # review = Review.objects.create(store=store, review_score=obj.review_score)
+                # review.save()
                 data['form2'] = form2
                 response = redirect('/accounts/google/login/')
                 response.set_cookie('store_name', store_name)
@@ -88,9 +86,12 @@ def Dashboard(request, any):
     return render(request, 'DashboardClient.html')
 
 def LoginSuccess(request):
-    # value = request.COOKIES.get('store_name')
-    # print('store', value)
-    google_user = SocialAccount.objects.filter(user=request.user)
-    print(request.COOKIES.get('store_name'))
-    print(request.COOKIES.get('review_score'))
+    data = SocialAccount.objects.filter(user=request.user)[0].extra_data
+    store_name = request.COOKIES.get('store_name')
+    review_score = request.COOKIES.get('review_score')
+    store = Store.objects.get(store_name=store_name)
+
+    review = Review.objects.create(store=store, review_score=review_score, customer_name=data.get('name'), review_email=data.get('email'))
+    review.save()
+
     return render(request, 'review/Home.html', {})
