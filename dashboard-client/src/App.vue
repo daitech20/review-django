@@ -1,24 +1,42 @@
-<script setup>
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-import HelloWorld from './components/HelloWorld.vue'
-import { asset } from './helpers'
-
-const logo = asset("logo.png");
-</script>
-
 <template>
-  <img alt="Vue logo" :src="logo" />
-  <HelloWorld msg="Hello Vue 3 + Vite" />
+    <a-layout style="min-height: 100vh">
+        <SideBar/>
+        <a-layout>
+            <Header/>
+            <a-layout-content class="content">
+                <router-view v-slot="{ Component }">
+                    <!-- <transition> -->
+                        <component :is="Component" />
+                    <!-- </transition> -->
+                </router-view>
+            </a-layout-content>
+            <Footer/>
+        </a-layout>
+    </a-layout>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+<script>
+import HelloWorld from './components/HelloWorld.vue'
+import { asset } from './helpers'
+import SideBar from './components/SideBar.vue'
+import Header from './components/Header.vue'
+import Footer from './components/Footer.vue'
+
+export default {
+    data() {
+        return {
+            logo: asset("logo.png")
+        }
+    },
+
+    components: {
+        SideBar, HelloWorld, Header, Footer
+    }
+}
+</script>
+
+<style scoped>
+.content {
+    margin: 0 16px;
 }
 </style>
