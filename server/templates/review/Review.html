@@ -17,9 +17,6 @@
                 <div class="review-header">
                     <img class="review-header-img" src="{% static 'review/assets/img/nailspa.png' %}" alt="nailspa">
                 </div>
-                {% if user.is_authenticated %}
-                    <p>Welcome, {{ user.username }} !</p>
-                {% endif %}
                 <span class="review-content">
                     Hi,  How would you rate your most recent service?
                 </span>
