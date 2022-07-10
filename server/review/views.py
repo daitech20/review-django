@@ -60,7 +60,7 @@ class ReviewPage(View):
                 data['form2'] = form2
                 response = redirect('/accounts/google/login/')
                 response.set_cookie('store_name', store_name)
-
+                response.set_cookie('review_score', obj.review_score)
                 # return render(request, 'review/Home.html', {})
                 return response
 
@@ -87,6 +87,10 @@ class ReviewPage(View):
 def Dashboard(request, any):
     return render(request, 'DashboardClient.html')
 
-def LoginSuccess(View):
-    def get(self, request):
-        return HttpResponse("ok")
+def LoginSuccess(request):
+    # value = request.COOKIES.get('store_name')
+    # print('store', value)
+    google_user = SocialAccount.objects.filter(user=request.user)
+    print(request.COOKIES.get('store_name'))
+    print(request.COOKIES.get('review_score'))
+    return render(request, 'review/Home.html', {})
