@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-b^h_9^-%96o!g0=o+4+7t+3tu*47749)pvn95$gg3#1(r)*!x%'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -147,7 +147,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # Setting google auth
-SITE_ID = 1
+SITE_ID = 2
 LOGIN_REDIRECT_URL = '/success'
 LOGOUT_REDIRECT_URL = '/'
 
