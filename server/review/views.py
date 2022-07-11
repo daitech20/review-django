@@ -10,7 +10,8 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.models import User
-
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializer import CustomJWTSerializer
 
 
 # Create your views here.
@@ -86,8 +87,12 @@ def LoginSuccess(request):
     review_score = request.COOKIES.get('review_score')
     user = User.objects.get(username=store_name)
     store = Store.objects.get(user=user)
-
+    store.customer.add(request.user)
+    store.save()
     review = Review.objects.create(store=store, review_score=review_score, customer_name=data.get('name'), review_email=data.get('email'))
     review.save()
 
     return HttpResponseRedirect(store.url_map_store)
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomJWTSerializer
