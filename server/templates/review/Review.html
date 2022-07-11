@@ -15,10 +15,10 @@
         <div class="review-container__wrapper">
             <div class="review-container">
                 <div class="review-header">
-                    <img class="review-header-img" src="{% static 'review/assets/img/nailspa.png' %}" alt="nailspa">
+                    <img class="review-header-img" src="{{ store.logo }}" alt="nailspa">
                 </div>
                 <span class="review-content">
-                    Hi,  How would you rate your most recent service?
+                    {{ store.message }}
                 </span>
                 <div class="rating-container">
                     <div class="star-container">
@@ -46,7 +46,7 @@
                     {{form.review_content}}
                     {{form.phone_number}}
                     {{ form.review_score  }}
-                   <button type="submit" onclick="test()" class="btn-submit" name="btnform">Submit</button>
+                   <button type="submit" class="btn-submit" name="btnform">Submit</button>
                 </form>
 
                 <form action="{% url 'review:ReviewPage' store.store_name %}" class="review-google-container" method="post" enctype="multipart/form-data">
