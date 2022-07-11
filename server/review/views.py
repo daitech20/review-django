@@ -8,6 +8,9 @@ from django.http import HttpResponse, HttpResponseRedirect
 import time
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.contrib import messages
+from django.contrib.auth.models import User
+
 
 
 # Create your views here.
@@ -19,25 +22,29 @@ def Home(request):
 
 class ReviewPage(View):
     def get(self, request, store_name):
-        store = Store.objects.get(store_name=store_name)
+        user = User.objects.get(username=store_name)
+        store = Store.objects.get(user=user)
         form = ReviewForm(initial={'review_score': 0})
         form2 = ReviewFormGoogle(initial={'review_score': 0})
         data = {
             'store': store,
             'form': form,
-            'form2': form2
+            'form2': form2,
+            'store_name': user.username
         }
 
         return render(request, 'review/Review.html', data)
 
     def post(self, request, store_name):
-        store = Store.objects.get(store_name=store_name)
+        user = User.objects.get(username=store_name)
+        store = Store.objects.get(user=user)
         form = ReviewForm(initial={'review_score': 0})
         form2 = ReviewFormGoogle(initial={'review_score': 0})
         data = {
             'store': store,
             'form': form,
-            'form2': form2
+            'form2': form2,
+            'store_name': user.username
         }
 
         if 'btnform' in request.POST:
@@ -47,6 +54,7 @@ class ReviewPage(View):
                 review = Review.objects.create(store=store, review_content=obj.review_content, phone_number=obj.phone_number, review_score=obj.review_score)
                 review.save()
                 data['form'] = form
+                data['message'] = "Thanks you for review!"
             else:
                 form = ReviewForm(initial={'review_score': 0})
         elif 'btnform2' in request.POST:
@@ -68,19 +76,6 @@ class ReviewPage(View):
         
         return render(request, 'review/Review.html', data)
 
-# class ReviewPageGoogle(View):
-#     def get(self, request, store_name):
-#         store = Store.objects.get(store_name=store_name)
-#         form = ReviewFormGoogle(initial={'review_score': 0})
-#         data = {
-#             'store': store,
-#             'form2': form
-#         }
-#
-#         return render(request, 'review/Review.html', data)
-
-# fb_id = SocialAccount.objects.filter(user=user)
-
 
 def Dashboard(request, any):
     return render(request, 'DashboardClient.html')
@@ -89,9 +84,10 @@ def LoginSuccess(request):
     data = SocialAccount.objects.filter(user=request.user)[0].extra_data
     store_name = request.COOKIES.get('store_name')
     review_score = request.COOKIES.get('review_score')
-    store = Store.objects.get(store_name=store_name)
+    user = User.objects.get(username=store_name)
+    store = Store.objects.get(user=user)
 
     review = Review.objects.create(store=store, review_score=review_score, customer_name=data.get('name'), review_email=data.get('email'))
     review.save()
 
-    return render(request, 'review/Home.html', {})
+    return HttpResponseRedirect(store.url_map_store)

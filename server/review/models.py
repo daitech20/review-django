@@ -9,6 +9,8 @@ class Store(models.Model):
     title = models.CharField(max_length=50)
     message = models.TextField()
     domain = models.CharField(max_length=50)
+    website = models.CharField(max_length=50)
+    url_map_store = models.TextField()
     customer = models.ManyToManyField(User, related_name='store_customers', blank=True)
 
 class Review(models.Model):
