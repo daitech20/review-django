@@ -1,17 +1,20 @@
 from django.shortcuts import render
 from allauth.socialaccount.models import SocialAccount
 from django.views import View, generic
-from .models import Review, Store
+from .models import Review, Store, Customer
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from .form import ReviewForm, ReviewFormGoogle
 from django.http import HttpResponse, HttpResponseRedirect
-import time
 from django.shortcuts import redirect
-from django.urls import reverse
-from django.contrib import messages
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializer import CustomJWTSerializer
+from rest_framework import generics, status
+from .serializer import CustomJWTSerializer, ReviewSerializer, StoreSerializer
+from rest_framework import permissions
+from django.shortcuts import get_object_or_404
+from rest_framework.response import Response
+from .permissions import IsOwnerOrReadOnly
+
 
 
 # Create your views here.
@@ -22,30 +25,26 @@ def Home(request):
     return render(request, 'review/Home.html', {})
 
 class ReviewPage(View):
-    def get(self, request, store_name):
-        user = User.objects.get(username=store_name)
-        store = Store.objects.get(user=user)
+    def get(self, request, store_slug):
+        store = Store.objects.get(store_slug=store_slug)
         form = ReviewForm(initial={'review_score': 0})
         form2 = ReviewFormGoogle(initial={'review_score': 0})
         data = {
             'store': store,
             'form': form,
-            'form2': form2,
-            'store_name': user.username
+            'form2': form2
         }
 
         return render(request, 'review/Review.html', data)
 
-    def post(self, request, store_name):
-        user = User.objects.get(username=store_name)
-        store = Store.objects.get(user=user)
+    def post(self, request, store_slug):
+        store = Store.objects.get(store_slug=store_slug)
         form = ReviewForm(initial={'review_score': 0})
         form2 = ReviewFormGoogle(initial={'review_score': 0})
         data = {
             'store': store,
             'form': form,
-            'form2': form2,
-            'store_name': user.username
+            'form2': form2
         }
 
         if 'btnform' in request.POST:
@@ -54,6 +53,15 @@ class ReviewPage(View):
                 obj = form.save(commit=False)
                 review = Review.objects.create(store=store, review_content=obj.review_content, phone_number=obj.phone_number, review_score=obj.review_score)
                 review.save()
+                customer = store.customer.filter(phone=obj.phone_number)
+                # customer = Customer.objects.filter(phone=obj.phone_number)
+                if not customer:
+                    customer = Customer.objects.create(phone=obj.phone_number)
+                else:
+                    customer = customer[0]
+                store.customer.add(customer)
+                store.save()
+
                 data['form'] = form
                 data['message'] = "Thanks you for review!"
             else:
@@ -66,7 +74,7 @@ class ReviewPage(View):
                 # review.save()
                 data['form2'] = form2
                 response = redirect('/accounts/google/login/')
-                response.set_cookie('store_name', store_name)
+                response.set_cookie('store_name', store.store_name)
                 response.set_cookie('review_score', obj.review_score)
                 # return render(request, 'review/Home.html', {})
                 return response
@@ -85,9 +93,15 @@ def LoginSuccess(request):
     data = SocialAccount.objects.filter(user=request.user)[0].extra_data
     store_name = request.COOKIES.get('store_name')
     review_score = request.COOKIES.get('review_score')
-    user = User.objects.get(username=store_name)
-    store = Store.objects.get(user=user)
-    store.customer.add(request.user)
+    store = Store.objects.get(store_name=store_name)
+    # customer = Customer.objects.filter(email=data.get('email'))
+    customer = store.customer.filter(email=data.get('email'))
+    if not customer:
+        customer = Customer.objects.create(full_name=data.get('name'), email=data.get('email'))
+    else:
+        customer = customer[0]
+
+    store.customer.add(customer)
     store.save()
     review = Review.objects.create(store=store, review_score=review_score, customer_name=data.get('name'), review_email=data.get('email'))
     review.save()
@@ -96,3 +110,26 @@ def LoginSuccess(request):
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomJWTSerializer
+
+class StoreList(generics.ListAPIView):
+    queryset = Store.objects.all()
+    serializer_class = StoreSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return Store.objects.all()
+        return Store.objects.filter(user=user)
+
+class ReviewList(generics.ListAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        user = self.request.user
+
+        return qs.filter(store=self.kwargs['store_id'])
