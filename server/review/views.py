@@ -9,7 +9,8 @@ from django.shortcuts import redirect
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import generics, status
-from .serializer import CustomJWTSerializer, ReviewSerializer, StoreSerializer, RegisterSerializer
+from .serializer import CustomJWTSerializer, ReviewSerializer, StoreSerializer, RegisterSerializer,\
+    UpdateStoreSerializer, DetailStoreSerializer
 from rest_framework import permissions
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
@@ -133,12 +134,24 @@ class ReviewList(generics.ListAPIView):
     def get_queryset(self):
         qs = super().get_queryset()
         user = self.request.user
-        store_id = self.kwargs['store_id']
-        store = Store.objects.get(id=store_id)
+        store_slug = self.kwargs['store_slug']
+        store = Store.objects.get(store_slug=store_slug)
         if store.user == user:
-            return qs.filter(store=self.kwargs['store_id'])
+            return qs.filter(store=store)
         return None
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
+
+class StoreDetail(generics.RetrieveAPIView):
+    queryset = Store
+    serializer_class = DetailStoreSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    lookup_field = 'store_slug'
+
+class StoreUpdate(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Store
+    serializer_class = UpdateStoreSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    lookup_field = 'store_slug'
