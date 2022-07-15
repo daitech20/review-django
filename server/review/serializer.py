@@ -3,6 +3,9 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
 from .models import Review, Store
+import django.contrib.auth.password_validation as validators
+from django.core import exceptions
+
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -49,3 +52,50 @@ class CustomJWTSerializer(MyTokenObtainPairSerializer):
             credentials['username'] = user_obj.username
 
         return super().validate(credentials)
+
+class RegisterSerializer(serializers.ModelSerializer):
+    username = serializers.CharField()
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, required=True)
+    password2 = serializers.CharField(write_only=True, required=True)
+
+    class Meta:
+        model = User
+        fields = ['username', 'password', 'password2', 'email', 'first_name', 'last_name']
+        extra_kwargs = {
+            'first_name': {'required': True},
+            'last_name': {'required': True}
+        }
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError({"error": "Password fields didn't match"})
+        errors = dict()
+        try:
+            # validate the password and catch the exception
+            validators.validate_password(password=attrs['password'])
+            # the exception raised here is different than serializers.ValidationError
+        except exceptions.ValidationError as e:
+            errors['error'] = list(e.messages)
+
+        if errors:
+            raise serializers.ValidationError(errors)
+        return attrs
+
+
+    def create(self, validated_data):
+        if User.objects.filter(username=validated_data["username"]).exists():
+            raise serializers.ValidationError({"username": "username exits"})
+        if User.objects.filter(email=validated_data["email"]).exists():
+            raise serializers.ValidationError({"email": "email exists"})
+        user = User.objects.create(
+            username=validated_data['username'],
+            email=validated_data['email'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name']
+        )
+
+        user.set_password(validated_data['password'])
+        user.save()
+
+        return user
