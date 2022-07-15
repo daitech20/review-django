@@ -9,7 +9,7 @@ from django.shortcuts import redirect
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import generics, status
-from .serializer import CustomJWTSerializer, ReviewSerializer, StoreSerializer
+from .serializer import CustomJWTSerializer, ReviewSerializer, StoreSerializer, RegisterSerializer
 from rest_framework import permissions
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
@@ -91,6 +91,8 @@ def Dashboard(request, any):
 
 def LoginSuccess(request):
     data = SocialAccount.objects.filter(user=request.user)[0].extra_data
+    social_account = User.objects.get(email=data.get('email'))
+    social_account.delete()
     store_name = request.COOKIES.get('store_name')
     review_score = request.COOKIES.get('review_score')
     store = Store.objects.get(store_name=store_name)
@@ -131,5 +133,12 @@ class ReviewList(generics.ListAPIView):
     def get_queryset(self):
         qs = super().get_queryset()
         user = self.request.user
+        store_id = self.kwargs['store_id']
+        store = Store.objects.get(id=store_id)
+        if store.user == user:
+            return qs.filter(store=self.kwargs['store_id'])
+        return None
 
-        return qs.filter(store=self.kwargs['store_id'])
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = RegisterSerializer
