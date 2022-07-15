@@ -48,7 +48,7 @@
                         </div>
                     </div>
                 </div>
-                <form action="{% url 'review:ReviewPage' store_name %}" class="complain-container" method="post" enctype="multipart/form-data">
+                <form action="{% url 'review:ReviewPage' store.store_slug %}" class="complain-container" method="post" enctype="multipart/form-data">
 <!--                    <textarea class="review-area" placeholder="Write review to help us better"></textarea>-->
 <!--                    <input class="review-input"  type="text" placeholder="Phone number (optional)">-->
                     {% csrf_token %}
@@ -58,7 +58,7 @@
                    <button type="submit" class="btn-submit" name="btnform">Submit</button>
                 </form>
 
-                <form action="{% url 'review:ReviewPage' store_name %}" class="review-google-container" method="post" enctype="multipart/form-data">
+                <form action="{% url 'review:ReviewPage' store.store_slug %}" class="review-google-container" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     {{ form2.review_score  }}
                     <button class="login-google-button" type="submit" name="btnform2" >
