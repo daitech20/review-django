@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
-from .models import Review, Store
+from .models import Review, Store, Customer
 import django.contrib.auth.password_validation as validators
 from django.core import exceptions
 
@@ -99,3 +99,20 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
 
         return user
+
+class CustomerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer
+        fields = '__all__'
+
+class DetailStoreSerializer(serializers.ModelSerializer):
+    customer = CustomerSerializer(many=True)
+    class Meta:
+        model = Store
+        fields = '__all__'
+
+class UpdateStoreSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Store
+        fields = '__all__'
