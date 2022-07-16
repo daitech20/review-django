@@ -116,3 +116,9 @@ class UpdateStoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Store
         fields = '__all__'
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'is_superuser', 'username', 'first_name', 'last_name', 'email']
+        lookup_field = 'username'

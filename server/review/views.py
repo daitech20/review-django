@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import generics, status
 from .serializer import CustomJWTSerializer, ReviewSerializer, StoreSerializer, RegisterSerializer,\
-    UpdateStoreSerializer, DetailStoreSerializer
+    UpdateStoreSerializer, DetailStoreSerializer, UserSerializer
 from rest_framework import permissions
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
@@ -155,3 +155,9 @@ class StoreUpdate(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UpdateStoreSerializer
     permission_classes = [permissions.IsAuthenticated]
     lookup_field = 'store_slug'
+
+class UserDetail(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = UserSerializer
+    lookup_field = 'username'
