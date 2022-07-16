@@ -1,6 +1,6 @@
 from django.urls import path, include
 from .views import Home, ReviewPage, LoginSuccess, MyTokenObtainPairView,\
-    ReviewList, StoreList, RegisterView, StoreDetail, StoreUpdate, UserDetail
+    ReviewList, StoreList, RegisterView, StoreDetail, StoreUpdate, UserDetail, ChangePassword
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -12,6 +12,7 @@ urlpatterns = [
     path('success/', LoginSuccess, name="LoginSuccess"),
     path('review/<slug:store_slug>/', ReviewPage.as_view(), name="ReviewPage"),
     path('api/user/<str:username>/', UserDetail.as_view()),
+    path('api/user/change/password/<str:username>/', ChangePassword.as_view(), name = "change_password"),
     path('api/token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/review/<slug:store_slug>/', ReviewList.as_view(), name='list_review'),
