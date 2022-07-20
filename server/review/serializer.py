@@ -14,6 +14,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class StoreSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField(read_only=True)
     class Meta:
         model = Store
         fields = '__all__'
@@ -112,7 +113,7 @@ class DetailStoreSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class UpdateStoreSerializer(serializers.ModelSerializer):
-
+    user = serializers.StringRelatedField(read_only=True)
     class Meta:
         model = Store
         fields = '__all__'
@@ -122,6 +123,11 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'is_superuser', 'username', 'first_name', 'last_name', 'email']
         lookup_field = 'username'
+
+class CustomerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer
+        fields = '__all__'
 
 class ChangePasswordSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)

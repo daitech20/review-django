@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from allauth.socialaccount.models import SocialAccount
 from django.views import View, generic
+from rest_framework import generics, status
 from .models import Review, Store, Customer
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from .form import ReviewForm, ReviewFormGoogle
@@ -10,7 +11,7 @@ from django.contrib.auth.models import User
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import generics, status
 from .serializer import CustomJWTSerializer, ReviewSerializer, StoreSerializer, RegisterSerializer,\
-    UpdateStoreSerializer, DetailStoreSerializer, UserSerializer, ChangePasswordSerializer
+    UpdateStoreSerializer, DetailStoreSerializer, UserSerializer, ChangePasswordSerializer, CustomerSerializer
 from rest_framework import permissions
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
@@ -137,12 +138,20 @@ class ReviewList(generics.ListAPIView):
         store_slug = self.kwargs['store_slug']
         store = Store.objects.get(store_slug=store_slug)
         if store.user == user:
-            return qs.filter(store=store)
+            return qs.filter(store=store).order_by('-created_at')
         return None
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
+
+class StoreCreate(generics.CreateAPIView):
+    queryset = Store
+    serializer_class = StoreSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 class StoreDetail(generics.RetrieveAPIView):
     queryset = Store
@@ -156,14 +165,57 @@ class StoreUpdate(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
     lookup_field = 'store_slug'
 
-class UserDetail(generics.RetrieveAPIView):
+class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = UserSerializer
     lookup_field = 'username'
+
+# array[
+#     'userDetail': {
+#         view: (user, extrasData) {
+#             return user.is_superuser || user.username = etraxData
+#         }
+#     }
+# ]
+
+
+# class Permission (user):
+#
+#     def getPerssionDeifination(self, resouceName):
+#         return find resouceName in array
+#
+#     def canEdit(self, resource):
+#         return true
+#
+#     def canView(self, resource):
+#         permisisonDefiniation = getPerssionDeifination(resouce.name)
+#         return permisisonDefiniation ? permissions.hasPermission(user, resource.extradaa) : false
+#
+#     def canDelete(self, resource):
+#         return true
+#
+#     def canCreate(self, resource):
 
 class ChangePassword(generics.UpdateAPIView):
     queryset = User.objects.all()
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = ChangePasswordSerializer
     lookup_field = 'username'
+
+class CustomerList(generics.ListAPIView):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+    def get_queryset(self):
+        store = Store.objects.get(store_slug=self.kwargs['store_slug'])
+        customers = store.customer.all()
+        return customers
+
+class CustomerUpdate(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    lookup_field = 'id'
