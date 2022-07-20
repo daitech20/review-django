@@ -11,8 +11,8 @@
                         <template #overlay>
                             <a-menu>
                                 <a-menu-item>1st menu item</a-menu-item>
-                                <a-menu-item>1st menu item</a-menu-item>
-                                <a-menu-item>1st menu item</a-menu-item>
+                                <a-menu-item>2st menu item</a-menu-item>
+                                <a-menu-item>3st menu item</a-menu-item>
                             </a-menu>
                         </template>
                     </a-dropdown>
@@ -44,7 +44,7 @@
 
                         <template #overlay>
                             <a-menu>
-                                <a-menu-item>Hi, Admin!</a-menu-item>
+                                <a-menu-item>Hi, {{ user.username }}</a-menu-item>
                                 <a-menu-item>Profile</a-menu-item>
                                 <a-menu-item @click="handleLogout">Logout</a-menu-item>
                             </a-menu>
@@ -61,6 +61,15 @@ export default {
     setup() {
         
     },
+
+    props: ['user'],
+
+    methods: {
+        handleLogout: function() {
+            window.localStorage.clear()
+            this.$router.push({name: 'login'})
+        }
+    }
 }
 </script>
 
