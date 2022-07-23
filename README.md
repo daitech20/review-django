@@ -44,6 +44,3 @@ Then run application and visit the url presents in the terminal.
 ```bash
 npm run dev
 ```
-
-## Contacts
-- phucnt.tech@gmail.com for the infrastructure issues.
