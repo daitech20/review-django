@@ -57,16 +57,20 @@
 </template>
 
 <script>
+import { authStore } from '../store/auth.store'
+import { mapActions, mapState } from 'pinia'
+
 export default {
-    setup() {
-        
+
+    computed: {
+        ...mapState(authStore, ['user'])
     },
 
-    props: ['user'],
-
     methods: {
+        ...mapActions(authStore, ['clearAccessToken', 'clearUser']),
         handleLogout: function() {
-            window.localStorage.clear()
+            this.clearAccessToken()
+            this.clearUser()
             this.$router.push({name: 'login'})
         }
     }
