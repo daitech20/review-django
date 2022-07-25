@@ -1,5 +1,5 @@
 import axios from "axios";
-const apiUrl = 'http://localhost:8088/api/';
+const apiUrl = import.meta.env.VITE_API_BASE_URL.trimEnd('/')+'/api/';
 
 export default {
     getHeaders() {
