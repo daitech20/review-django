@@ -132,6 +132,7 @@ export default({
                     break
                   }
                 }
+                this.$router.push({ name: 'store.list'});
               }
           )
           .catch(error=> {

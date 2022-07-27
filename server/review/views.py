@@ -93,7 +93,8 @@ def Dashboard(request, any):
 
 def LoginSuccess(request):
     data = SocialAccount.objects.filter(user=request.user)[0].extra_data
-    social_account = User.objects.get(email=data.get('email'))
+    print(data)
+    social_account = User.objects.filter(email=data.get('email')).last()
     social_account.delete()
     store_name = request.COOKIES.get('store_name')
     review_score = request.COOKIES.get('review_score')
@@ -134,12 +135,10 @@ class ReviewList(generics.ListAPIView):
 
     def get_queryset(self):
         qs = super().get_queryset()
-        user = self.request.user
         store_slug = self.kwargs['store_slug']
         store = Store.objects.get(store_slug=store_slug)
-        if store.user == user:
-            return qs.filter(store=store).order_by('-created_at')
-        return None
+
+        return qs.filter(store=store).order_by('-created_at')
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -211,7 +210,7 @@ class CustomerList(generics.ListAPIView):
 
     def get_queryset(self):
         store = Store.objects.get(store_slug=self.kwargs['store_slug'])
-        customers = store.customer.all()
+        customers = store.customer.all().order_by('-id')
         return customers
 
 class CustomerUpdate(generics.RetrieveUpdateDestroyAPIView):

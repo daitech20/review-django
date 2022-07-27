@@ -70,7 +70,6 @@ export default {
             BaseRequest.get('user/' + user)
             .then(response => {
                 this.user = response.data
-                console.log(this.user)
             })
             .catch(error=> {
                 console.log(error.response.data);

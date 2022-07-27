@@ -8,7 +8,8 @@ import StoreCreatePage from './views/StoreCreatePage.vue'
 import SupportCenterPage from './views/SupportCenterPage.vue'
 import AppearanceSettingPage from './views/settings/AppearanceSettingPage.vue'
 import GoogleAPISettingPage from './views/settings/GoogleAPISettingPage.vue'
-import CreateAccountPage from './views/CreateAccountPage.vue'
+import AccountListPage from './views/AccountListPage.vue'
+import AccountCreatePage from './views/AccountCreatePage.vue'
 import CustomerListPage from './views/CustomerListPage.vue'
 
 const routes = [
@@ -24,9 +25,8 @@ const routes = [
     },
     {
         name: 'review.list',
-        path: '/dashboard/reviews/:store_slug',
-        component: ReviewListPage,
-        props:true
+        path: '/dashboard/reviews',
+        component: ReviewListPage
     },
     {
         name: 'store.list',
@@ -47,13 +47,17 @@ const routes = [
     {
         name: 'customer.list',
         path: '/dashboard/customers',
-        component: CustomerListPage,
-        props:true
+        component: CustomerListPage
     },
     {
-        name: 'account',
+        name: 'account.create',
+        path: '/dashboard/account/create',
+        component: AccountCreatePage
+    },
+    {
+        name: 'account.list',
         path: '/dashboard/account',
-        component: CreateAccountPage
+        component: AccountListPage
     },
     {
         name: 'support_center',

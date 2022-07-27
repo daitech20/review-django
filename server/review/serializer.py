@@ -62,22 +62,18 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'password', 'password2', 'email', 'first_name', 'last_name']
-        extra_kwargs = {
-            'first_name': {'required': True},
-            'last_name': {'required': True}
-        }
+        fields = ['username', 'password', 'password2', 'email']
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
-            raise serializers.ValidationError({"error": "Password fields didn't match"})
+            raise serializers.ValidationError({"password": "Password fields didn't match"})
         errors = dict()
         try:
             # validate the password and catch the exception
             validators.validate_password(password=attrs['password'])
             # the exception raised here is different than serializers.ValidationError
         except exceptions.ValidationError as e:
-            errors['error'] = list(e.messages)
+            errors['password'] = list(e.messages)
 
         if errors:
             raise serializers.ValidationError(errors)
@@ -86,14 +82,12 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         if User.objects.filter(username=validated_data["username"]).exists():
-            raise serializers.ValidationError({"username": "username exits"})
+            raise serializers.ValidationError({"username": "User name already exists"})
         if User.objects.filter(email=validated_data["email"]).exists():
-            raise serializers.ValidationError({"email": "email exists"})
+            raise serializers.ValidationError({"email": "Email already exists"})
         user = User.objects.create(
             username=validated_data['username'],
-            email=validated_data['email'],
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name']
+            email=validated_data['email']
         )
 
         user.set_password(validated_data['password'])

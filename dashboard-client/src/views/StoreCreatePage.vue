@@ -84,13 +84,6 @@ export default({
             BaseRequest.post('store/create/', this.store)
             .then(response => {
                     console.log(response.data)
-                    this.store.store_name = response.data.store_name
-                    this.store.title = response.data.title
-                    this.store.logo = response.data.logo
-                    this.store.message = response.data.message
-                    this.store.domain = response.data.domain
-                    this.store.website = response.data.website
-                    this.store.url_map_store = response.data.url_map_store
                     this.errors = {}
                     this.addSuccessNotification()
                     this.$router.push({ name: 'store.list'});

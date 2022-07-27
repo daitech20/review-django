@@ -4,6 +4,7 @@
     title="Reviews"
     sub-title="This is a reviews of store " />
     <a-layout-content style="padding: 0 50px">
+    <a-cascader v-model:value="value" :options="options" placeholder="Please select" :allowClear="false" />
         <a-table :columns="columns" :data-source="data">
             <template #bodyCell="{ column, record }">
               <template v-if="column.dataIndex === 'name'">
@@ -26,15 +27,16 @@ import { notification } from 'ant-design-vue';
 export default({
   data() {
     return {
-        // data: [{ message: 'Foo' }, { message: 'Bar' }],
+        options: [],
+        value: [],
         columns: [],
-        review: [],
+        reviews: [],
+        store: [],
         errors: {
 
         },
         data: [],
-        colums: [],
-        visible: false
+        visible: false,
     }
   },
 
@@ -42,8 +44,10 @@ export default({
     this.getData()
   },
 
-  updated() {
-    this.getData()
+  watch: {
+      value: function() {
+        this.getReview()
+      }
   },
 
   methods: {
@@ -52,95 +56,96 @@ export default({
           {
             title: 'Name Customer',
             dataIndex: 'name',
-            key: 'name',
+            key: 'name'
           },
           {
             title: 'Phone Number',
             dataIndex: 'phone',
-            key: 'phone',
+            key: 'phone'
           },
           {
             title: 'Review Score',
             dataIndex: 'score',
-            key: 'score',
+            key: 'score'
           },
           {
             title: 'Review Content',
             dataIndex: 'content',
-            key: 'content',
-            ellipsis: true,
+            key: 'content'
           },
           {
             title: 'Email',
             dataIndex: 'email',
-            key: 'email',
-            ellipsis: true,
+            key: 'email'
           },
           {
             title: 'Created',
             dataIndex: 'created',
             key: 'created',
-            ellipsis: true,
+            ellipsis: true
           },
         ];
 
       
-      BaseRequest.get('review/' + this.$route.params.store_slug)
-        .then(response => {
-            this.review = response.data;
-            this.data = []
-            for (const key in this.review) {
-              this.data.push({
-                name: this.review[key].customer_name,
-                phone: this.review[key].phone_number,
-                score: this.review[key].review_score,
-                content: this.review[key].review_content,
-                email: this.review[key].review_email,
-                created: this.review[key].created_at
-              })
-            }
-        })
-        .catch(error=> {
-            this.errors = error.response.data
-        });
+      BaseRequest.get('store/')
+      .then(response => {
+        this.store = response.data;
+        if (this.store.length > 0) {
+          this.value.push(this.store[0].store_slug)
+          this.data = []
+
+          BaseRequest.get('review/' + this.store[0].store_slug)
+            .then(response => {
+                this.reviews = response.data;
+                this.data = []
+                for (const num in this.reviews) {
+                  this.data.push({
+                    name: this.reviews[num].customer_name,
+                    phone: this.reviews[num].phone_number,
+                    score: this.reviews[num].review_score,
+                    content: this.reviews[num].review_content,
+                    email: this.reviews[num].review_email,
+                    created: this.reviews[num].created_at
+                  })
+                }
+            })
+            .catch(error=> {
+                this.errors = error.response.data
+            });
+        }
+
+        for (let num in this.store) {
+          this.options.push({
+              value: this.store[num].store_slug,
+              label: this.store[num].store_name,
+          })
+        }
+      })
+      .catch(error=> {
+          this.errors = error.response.data
+      });
     },
-    // handleAdd: function() {
-    //   this.$router.push({ name: 'store.create'});
-    // },
 
-    // showModalDelete: function(name: any, slug: any) {
-    //   this.name_store_del = name
-    //   this.slug_store_del = slug
-    //   this.visible = true
-    // },
-
-    // handleDelete: function() {
-    //   this.visible = false
-    //   BaseRequest.delete('store/update/' + this.slug_store_del)
-    //         .then(response => {
-    //             this.errors = {}
-    //             this.delSuccessNotification()
-    //             for (let key=0; key<this.data.length; key++) {
-    //               if (this.data[key].slug === this.slug_store_del) {
-    //                 this.data.splice(key, 1)
-    //                 break
-    //               }
-    //             }
-    //           }
-    //       )
-    //       .catch(error=> {
-    //           this.errors = error.response.data
-    //           console.log(this.errors)
-    //       });
-    // },
-
-    // delSuccessNotification: function() {
-    //     notification['success']({
-    //         message: 'Delete successfully!',
-    //         description:
-    //         'Store was deleted! ',
-    //     });
-    // }
+    getReview: function() {
+      this.data = []
+      BaseRequest.get('review/' + this.value[0])
+      .then(response => {
+          this.reviews = response.data
+          for (const num in this.reviews) {
+              this.data.push({
+                name: this.reviews[num].customer_name,
+                  phone: this.reviews[num].phone_number,
+                  score: this.reviews[num].review_score,
+                  content: this.reviews[num].review_content,
+                  email: this.reviews[num].review_email,
+                  created: this.reviews[num].created_at
+              })
+          }
+      })
+      .catch(error=> {
+          this.errors = error.response.data
+      });
+    }
   }
 });
 </script>

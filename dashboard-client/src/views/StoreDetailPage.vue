@@ -11,7 +11,7 @@
             :validate-messages="validateMessages"
             @finish="onFinish"
         >
-            <a-form-item :name="['store_name']" label="Name Store" :rules="[{ required: true }]">
+            <a-form-item :name="['store_name']" label="Name Store" :rules="[{ required: true }]" :validateStatus="errors.store_name ? 'error': ''">
             <a-input v-model:value="store.store_name" />
             <a-typography-text v-if="errors.store_name" type="danger">
                 {{errors.store_name[0]}}
@@ -95,14 +95,6 @@ export default({
         onFinish: function(values: any) {
             BaseRequest.put('store/update/' + this.$route.params.store_slug, this.store)
             .then(response => {
-                    console.log(response.data)
-                    this.store.store_name = response.data.store_name
-                    this.store.title = response.data.title
-                    this.store.logo = response.data.logo
-                    this.store.message = response.data.message
-                    this.store.domain = response.data.domain
-                    this.store.website = response.data.website
-                    this.store.url_map_store = response.data.url_map_store
                     this.errors = {}
                     this.updateSuccessNotification()
                     this.$router.push({ name: 'store.list'});

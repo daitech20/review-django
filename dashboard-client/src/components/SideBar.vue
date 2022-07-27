@@ -8,34 +8,28 @@
                 <a-icon name="PieChartOutlined"></a-icon>
                 <router-link class="menu-link" :to="{name: 'dashboard'}">Dashboard</router-link>
             </a-menu-item>
+
             <a-menu-item key="account" v-if="user.is_superuser">
                 <a-icon name="UserOutlined"></a-icon>
-                <router-link class="menu-link" :to="{name: 'account'}">Account</router-link>
+                <router-link class="menu-link" :to="{name: 'account.list'}">Account</router-link>
             </a-menu-item>
-            <a-sub-menu key="review">
-                <template #title>
-                    <span>
-                        <a-icon name="MessageOutlined"></a-icon>
-                        <span>Reviews</span>
-                    </span>
-                </template>
-                <a-menu-item v-for="store in this.stores" :key="store.id">
-                    <router-link class="menu-link" :to="{name: 'review.list', params: { store_slug: store.store_slug }}">{{store.store_name}}</router-link>
-                </a-menu-item>
-            </a-sub-menu>
-            <!-- <a-menu-item key="review.list">
+
+            <a-menu-item key="review.list">
                 <a-icon name="MessageOutlined"></a-icon>
                 <router-link class="menu-link" :to="{name: 'review.list'}">Review</router-link>
-            </a-menu-item> -->
+            </a-menu-item>
+
             <a-menu-item key="customer.list">
                 <a-icon name="UserOutlined"></a-icon>
                 <router-link class="menu-link" :to="{name: 'customer.list'}">Customer</router-link>
             </a-menu-item>
+
             <a-menu-item key="store.list">
                 <a-icon name="ShopOutlined"></a-icon>
                 <router-link class="menu-link" :to="{name: 'store.list'}">Store</router-link>
             </a-menu-item>
-            <a-sub-menu key="setting">
+
+            <a-sub-menu key="setting" v-if="user.is_superuser">
                 <template #title>
                     <span>
                         <a-icon name="SettingOutlined"></a-icon>
@@ -88,6 +82,10 @@ export default {
         this.getListStore()
     },
 
+    updated() {
+        this.getListStore()
+    },
+    
     methods: {
         ...mapActions(appearance, ['isSidebarCollapased', 'setSidebarCollapsed']),
 
