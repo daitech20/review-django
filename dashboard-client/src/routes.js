@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router"
+import { authStore } from "./store/auth.store"
 import LoginPage from './views/LoginPage.vue'
 import DashboardPage from './views/DashboardPage.vue'
 import ReviewListPage from './views/ReviewListPage.vue'
@@ -82,6 +83,16 @@ router.beforeEach(async(to) => {
     // Always redirect to dashboard
     if (! /^\/dashboard\/(.*)/.test(to.path)) {
         return "/dashboard/"
+    }
+
+    // redirect to login page if not logged in and trying to access a restricted page
+    const publicPages = ['login'];
+    const authRequired = !publicPages.includes(to.name);
+    const auth = authStore();
+
+    if (authRequired && !auth.isLoggedIn) {
+        auth.returnUrl = to.fullPath;
+        return '/dashboard/login';
     }
 })
 

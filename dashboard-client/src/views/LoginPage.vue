@@ -12,7 +12,7 @@
                         <a-icon name="UserOutlined" > </a-icon>
                     </span>
                     <div class="input-transform-lowercase">
-                        <input placeholder="Store" type="text" class="input__inner" v-model="user.username" :class="{'is-invalid': errors.username || errors.detail }" name="username" >
+                        <input placeholder="Store" type="text" class="input__inner" v-model="credentials.username" :class="{'is-invalid': errors.username || errors.detail }" name="username" >
                     </div>
                 </div>
             </div>
@@ -23,7 +23,7 @@
                         <a-icon name="UnlockOutlined" > </a-icon>
                     </span>
                     <div class="input-transform-lowercase">
-                        <input placeholder="Password" type="password" class="input__inner" v-model="user.password" :class="{'is-invalid': errors.password || errors.detail}" name="password" >
+                        <input placeholder="Password" type="password" class="input__inner" v-model="credentials.password" :class="{'is-invalid': errors.password || errors.detail}" name="password" >
                     </div>
                 </div>
             </div>
@@ -36,34 +36,34 @@
 </template>
 
 <script>
-import BaseRequest from '../core/BaseRequest.js'
+import authService from '@/services/review_app/auth.service';
+import { authStore } from '@/store/auth.store';
+import { mapActions } from 'pinia';
 
 export default {
     data() {
         return {
-            isLoginIn: false,
-            user: {
-                    username: "",
-                    password: ""
+            credentials: {
+                username: "",
+                password: ""
             },
             errors: {}
         }
     },
 
     methods: {
-        login: function() {
-            BaseRequest.post('token/', this.user)
-            .then(response => {
-                console.log(response.data);
-                this.isLoginIn = true
-                window.localStorage.setItem('token', response.data.access)
-                window.localStorage.setItem('user', response.data.user)
-                window.localStorage.setItem('isLoginIn', this.isLoginIn)
-                this.$router.push({name: 'dashboard'})
-            })
-            .catch(error=> {
-                this.errors = error.response.data
-                console.log(this.errors);
+        ...mapActions(authStore, ['setAccessToken', 'setUser']),
+
+        login() {
+            authService.login(this.credentials.username, this.credentials.password).then(response => {
+                console.log(response);
+                this.setAccessToken(response.data.access);
+                this.setUser(response.data.user);
+
+                this.$router.push({name: 'dashboard'});
+            }).catch(error => {
+                console.log(error.response.data);
+                this.errors = error.response.data;
             });
         }
     }
