@@ -5,7 +5,7 @@
                 <a-space :size="15">
                     <a-dropdown placement="bottomRight">
                         <a class="ant-dropdown-link" @click.prevent>
-                            <a-icon name="AppstoreOutlined" :style="rightMenuIconStyle"/>
+                            <a-icon name="AppstoreOutlined" />
                         </a>
 
                         <template #overlay>
@@ -19,7 +19,7 @@
 
                     <a-dropdown placement="bottomRight">
                         <a class="ant-dropdown-link" @click.prevent>
-                            <a-icon name="BellOutlined" :style="rightMenuIconStyle"/>
+                            <a-icon name="BellOutlined" />
                         </a>
 
                         <template #overlay>
@@ -29,7 +29,7 @@
 
                     <a-dropdown placement="bottomRight">
                         <a class="ant-dropdown-link" @click.prevent>
-                            <a-icon name="MailOutlined" :style="rightMenuIconStyle"/>
+                            <a-icon name="MailOutlined" />
                         </a>
 
                         <template #overlay>
@@ -45,7 +45,11 @@
                         <template #overlay>
                             <a-menu>
                                 <a-menu-item>Hi, {{ user.username }}</a-menu-item>
-                                <a-menu-item>Profile</a-menu-item>
+                                <a-menu-item>
+                                    <router-link :to="{ name: 'account.detail', params: { username: user.username }}" >
+                                        Profile
+                                    </router-link>
+                                </a-menu-item>
                                 <a-menu-item @click="handleLogout">Logout</a-menu-item>
                             </a-menu>
                         </template>
@@ -57,17 +61,22 @@
 </template>
 
 <script>
+import { authStore } from '../store/auth.store'
+import { mapActions, mapState } from 'pinia'
+
 export default {
-    setup() {
-        
+
+    computed: {
+        ...mapState(authStore, ['user'])
     },
 
-    props: ['user'],
-
     methods: {
+        ...mapActions(authStore, ['clearAccessToken', 'clearUser', 'clearRefreshToken']),
         handleLogout: function() {
-            window.localStorage.clear()
-            this.$router.push({name: 'login'})
+            this.clearAccessToken()
+            this.clearRefreshToken()
+            this.clearUser()
+            this.$router.push({path: 'login'})
         }
     }
 }

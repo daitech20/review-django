@@ -5,9 +5,9 @@
     sub-title="This is a subtitle of create account page" />
     <a-layout-content style="padding: 0 50px">
         <a-form
-            :model="user"
+            :model="user_input"
             name="basic"
-            :label-col="{ span: 8 }"
+            :label-col="{ span: 4 }"
             :wrapper-col="{ span: 16 }"
             @finish="onFinish"
         >
@@ -15,9 +15,9 @@
                 label="Username"
                 name="username"
                 :rules="[{ required: true, message: 'Please input your username!' }]"
-                :validateStatus="errors.username ? 'error': ''"
+                :validateStatus="errors.username  ? 'error': ''"
             >
-                <a-input v-model:value="user.username" />
+                <a-input v-model:value="user_input.username" />
                 <a-typography-text v-if="errors.username" type="danger">
                     {{errors.username}}
                 </a-typography-text>
@@ -29,7 +29,7 @@
                 :rules="[{ required: true, message: 'Please input your password!' }]"
                 :validateStatus="errors.password ? 'error': ''"
             >
-                <a-input-password v-model:value="user.password" />
+                <a-input-password v-model:value="user_input.password" />
                 <a-typography-text v-if="errors.password" type="danger">
                     {{errors.password[0]}}
                 </a-typography-text>
@@ -41,7 +41,7 @@
                 :rules="[{ required: true, message: 'Please input your password 2!' }]"
                 :validateStatus="errors.password     ? 'error': ''"
             >
-                <a-input-password v-model:value="user.password2" />
+                <a-input-password v-model:value="user_input.password2" />
             </a-form-item>
 
             <a-form-item
@@ -50,40 +50,67 @@
                 :rules="[{ required: true, message: 'Please input your Email!' }, { type: 'email' }]"
                 :validateStatus="errors.email ? 'error': ''"
             >
-                <a-input v-model:value="user.email" />
+                <a-input v-model:value="user_input.email" />
                 <a-typography-text v-if="errors.email" type="danger">
                     {{errors.email}}
                 </a-typography-text>
             </a-form-item>
 
+            <a-form-item 
+                label="Type"
+                name="type"
+            >
+                <a-radio-group v-model:value="user_input.is_superuser">
+                    <a-radio value="0">Store</a-radio>
+                    <a-radio value="1">Admin</a-radio>
+                </a-radio-group>
+            </a-form-item>
+
             <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
-            <a-button type="primary" html-type="submit">Submit</a-button>
+                <a-button type="primary" html-type="submit">Submit</a-button>
             </a-form-item>
         </a-form>
+
     </a-layout-content>
 </template>
 
-<script lang="ts">
-import BaseRequest from '../core/BaseRequest.js'
+<script>
+import BaseRequest from '@/core/BaseRequest.js'
 import { notification } from 'ant-design-vue';
+import { authStore } from '@/store/auth.store'
+import { mapActions, mapState } from 'pinia'
 
 export default {
     data() {
         return {
-            user: {
+            user_input: {
                 username: '',
                 password: '',
                 password2: '',
-                email: ''
+                email: '',
+                is_superuser: '0'
             },
-            errors: {
-            }
+            errors: {}
         }
     },
 
+    computed: {
+        ...mapState(authStore, ['user'])
+    },
+
+    mounted() {
+        this.checkSuperUser()
+    },
+
     methods: {
-        onFinish: function(values: any) {
-            BaseRequest.post('register/', this.user)
+        checkSuperUser: function() {
+            if (!this.user.is_superuser ) {
+                this.$router.push({name: 'dashboard'})
+            }
+        },
+
+        onFinish: function() {
+            BaseRequest.post('register/', this.user_input)
             .then(response => {
                     console.log(response.data)
                     this.errors = {}
@@ -93,7 +120,6 @@ export default {
             )
             .catch(error=> {
                 this.errors = error.response.data
-                console.log(this.errors)
             });
         },
 

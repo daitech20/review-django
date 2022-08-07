@@ -95,7 +95,8 @@ export default {
                 this.stores = response.data
             })
             .catch(error=> {
-                this.errors = error.response.data
+                this.errors = error.response
+                console.log(this.error)
             });
         }
     }

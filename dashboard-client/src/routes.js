@@ -1,16 +1,20 @@
 import { createRouter, createWebHistory } from "vue-router"
-import LoginPage from './views/LoginPage.vue'
+import { authStore } from "./store/auth.store"
+import LoginPage from './views/login/LoginPage.vue'
 import DashboardPage from './views/DashboardPage.vue'
-import ReviewListPage from './views/ReviewListPage.vue'
-import StoreListPage from './views/StoreListPage.vue'
-import StoreDetailPage from './views/StoreDetailPage.vue'
-import StoreCreatePage from './views/StoreCreatePage.vue'
-import SupportCenterPage from './views/SupportCenterPage.vue'
+import ReviewListPage from './views/reviews/ReviewListPage.vue'
+import StoreListPage from './views/store/StoreListPage.vue'
+import StoreDetailPage from './views/store/StoreDetailPage.vue'
+import StoreCreatePage from './views/store/StoreCreatePage.vue'
+import SupportCenterPage from './views/support/SupportCenterPage.vue'
 import AppearanceSettingPage from './views/settings/AppearanceSettingPage.vue'
 import GoogleAPISettingPage from './views/settings/GoogleAPISettingPage.vue'
-import AccountListPage from './views/AccountListPage.vue'
-import AccountCreatePage from './views/AccountCreatePage.vue'
-import CustomerListPage from './views/CustomerListPage.vue'
+import AccountListPage from './views/accounts/AccountListPage.vue'
+import AccountCreatePage from './views/accounts/AccountCreatePage.vue'
+import AccountDetailPage from './views/accounts/AccountDetailPage.vue'
+import AccountResetPasswordPage from './views/accounts/AccountResetPasswordPage.vue'
+import AccountChangePasswordPage from './views/accounts/AccountChangePasswordPage.vue'
+import CustomerListPage from './views/customers/CustomerListPage.vue'
 
 const routes = [
     {
@@ -37,7 +41,7 @@ const routes = [
         name: 'store.detail',
         path: '/dashboard/store/:store_slug',
         component: StoreDetailPage,
-        props: true
+        params: true
     },
     {
         name: 'store.create',
@@ -58,6 +62,24 @@ const routes = [
         name: 'account.list',
         path: '/dashboard/account',
         component: AccountListPage
+    },
+    {
+        name: 'account.detail',
+        path: '/dashboard/account/:username',
+        component: AccountDetailPage,
+        params: true
+    },
+    {
+        name: 'account.resetpassword',
+        path: '/dashboard/account/resetpassword/:username',
+        component: AccountResetPasswordPage,
+        params: true
+    },
+    {
+        name: 'account.changepassword',
+        path: '/dashboard/account/changepassword/:username',
+        component: AccountChangePasswordPage,
+        params: true
     },
     {
         name: 'support_center',
@@ -86,6 +108,16 @@ router.beforeEach(async(to) => {
     // Always redirect to dashboard
     if (! /^\/dashboard\/(.*)/.test(to.path)) {
         return "/dashboard/"
+    }
+
+    // redirect to login page if not logged in and trying to access a restricted page
+    const publicPages = ['login'];
+    const authRequired = !publicPages.includes(to.name);
+    const auth = authStore();
+
+    if (authRequired && !auth.isLoggedIn) {
+        auth.returnUrl = to.fullPath;
+        return '/dashboard/login';
     }
 })
 

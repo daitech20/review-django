@@ -5,7 +5,7 @@ from django.contrib.auth.models import Group
 from .models import Review, Store, Customer
 import django.contrib.auth.password_validation as validators
 from django.core import exceptions
-
+from allauth.socialaccount.models import SocialApp
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -20,22 +20,20 @@ class StoreSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-
     def validate(self, attrs):
         # The default result (access/refresh tokens)
         data = super(MyTokenObtainPairSerializer, self).validate(attrs)
         # Custom data you want to include
-
-        data.update({'id': self.user.id})
-        data.update({'user': self.user.username})
-        data.update({'email': self.user.email})
-        data.update({'first_name': self.user.first_name})
-        data.update({'last_name': self.user.last_name})
-        data.update({'is_superuser': self.user.is_superuser})
-
-        users_in_group = Group.objects.get(name="Store").user_set.all()
-        if self.user in users_in_group:
-            data.update({'group': 'store'})
+        data.update({'user':
+                         {
+                             'id': self.user.id,
+                             'username': self.user.username,
+                             'email': self.user.email,
+                             'first_name': self.user.first_name,
+                             'last_name': self.user.last_name,
+                             'is_superuser': self.user.is_superuser
+                         }
+                     })
         # and everything else you want to send in the response
         return data
 
@@ -62,7 +60,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'password', 'password2', 'email']
+        fields = ['username', 'password', 'password2', 'email', 'is_superuser',]
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
@@ -77,6 +75,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         if errors:
             raise serializers.ValidationError(errors)
+
         return attrs
 
 
@@ -91,6 +90,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
 
         user.set_password(validated_data['password'])
+        user.save()
+		
+        user.is_superuser = validated_data['is_superuser']
         user.save()
 
         return user
@@ -134,7 +136,7 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if attrs['new_password1'] != attrs['new_password2']:
-            raise serializers.ValidationError({"error": "Password fields didn't match"})
+            raise serializers.ValidationError({"new_password": "Password fields didn't match"})
         errors = dict()
 
         try:
@@ -142,18 +144,18 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
             validators.validate_password(password=attrs['new_password1'])
             # the exception raised here is different than serializers.ValidationError
         except exceptions.ValidationError as e:
-            errors['error'] = list(e.messages)
+            errors['new_password'] = list(e.messages)
 
         try:
             user = User.objects.get(username=attrs['username'])
-            print(user.password)
             if not user.check_password(attrs['password']):
-                raise serializers.ValidationError({"error": "Password wrong!"})
+                raise serializers.ValidationError({"password": "Password wrong!"})
         except exceptions.ValidationError as e:
             errors['error'] = "User not found!"
 
         if errors:
             raise serializers.ValidationError(errors)
+
         return attrs
 
     def update(self, instance, validated_data):
@@ -163,3 +165,48 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
         user.save()
 
         return user
+
+		
+class ResetPasswordSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=True)
+    password2 = serializers.CharField(write_only=True, required=True)
+
+    class Meta:
+        model = User
+        fields = ['username', 'password', 'password2']
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError({"password": "Password fields didn't match"})
+        errors = dict()
+
+        try:
+            # validate the password and catch the exception
+            validators.validate_password(password=attrs['password'])
+            # the exception raised here is different than serializers.ValidationError
+        except exceptions.ValidationError as e:
+            errors['password'] = list(e.messages)
+
+        try:
+            user = User.objects.get(username=attrs['username'])
+        except exceptions.ValidationError as e:
+            errors['error'] = "User not found!"
+
+        if errors:
+            raise serializers.ValidationError(errors)
+
+        return attrs
+
+    def update(self, instance, validated_data):
+        username = validated_data.pop('username')
+        user = User.objects.get(username=username)
+        user.set_password(validated_data['password'])
+        user.save()
+
+        return user
+
+
+class SocialApplicationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SocialApp
+        fields = ['name', 'client_id', 'secret']

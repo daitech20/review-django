@@ -4,6 +4,7 @@ from django.views import View, generic
 from rest_framework import generics, status
 from .models import Review, Store, Customer
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
+from allauth.socialaccount.models import SocialApp
 from .form import ReviewForm, ReviewFormGoogle
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
@@ -11,12 +12,12 @@ from django.contrib.auth.models import User
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import generics, status
 from .serializer import CustomJWTSerializer, ReviewSerializer, StoreSerializer, RegisterSerializer,\
-    UpdateStoreSerializer, DetailStoreSerializer, UserSerializer, ChangePasswordSerializer, CustomerSerializer
+    UpdateStoreSerializer, DetailStoreSerializer, UserSerializer, ChangePasswordSerializer,\
+    CustomerSerializer, ResetPasswordSerializer, SocialApplicationSerializer
 from rest_framework import permissions
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from .permissions import IsOwnerOrReadOnly
-
 
 
 # Create your views here.
@@ -56,7 +57,6 @@ class ReviewPage(View):
                 review = Review.objects.create(store=store, review_content=obj.review_content, phone_number=obj.phone_number, review_score=obj.review_score)
                 review.save()
                 customer = store.customer.filter(phone=obj.phone_number)
-                # customer = Customer.objects.filter(phone=obj.phone_number)
                 if not customer:
                     customer = Customer.objects.create(phone=obj.phone_number)
                 else:
@@ -72,16 +72,11 @@ class ReviewPage(View):
             form2 = ReviewFormGoogle(request.POST)
             if form2.is_valid():
                 obj = form2.save(commit=False)
-                # review = Review.objects.create(store=store, review_score=obj.review_score)
-                # review.save()
                 data['form2'] = form2
                 response = redirect('/accounts/google/login/')
                 response.set_cookie('store_name', store.store_name)
                 response.set_cookie('review_score', obj.review_score)
-                # return render(request, 'review/Home.html', {})
                 return response
-
-
             else:
                 form2 = ReviewForm(initial={'review_score': 0})
         
@@ -93,13 +88,11 @@ def Dashboard(request, any):
 
 def LoginSuccess(request):
     data = SocialAccount.objects.filter(user=request.user)[0].extra_data
-    print(data)
     social_account = User.objects.filter(email=data.get('email')).last()
     social_account.delete()
     store_name = request.COOKIES.get('store_name')
     review_score = request.COOKIES.get('review_score')
     store = Store.objects.get(store_name=store_name)
-    # customer = Customer.objects.filter(email=data.get('email'))
     customer = store.customer.filter(email=data.get('email'))
     if not customer:
         customer = Customer.objects.create(full_name=data.get('name'), email=data.get('email'))
@@ -125,13 +118,13 @@ class StoreList(generics.ListAPIView):
         user = self.request.user
         if user.is_superuser:
             return Store.objects.all()
+
         return Store.objects.filter(user=user)
 
 class ReviewList(generics.ListAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = [permissions.IsAuthenticated]
-
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -164,6 +157,12 @@ class StoreUpdate(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
     lookup_field = 'store_slug'
 
+	
+class UserList(generics.ListAPIView):
+    queryset = User.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = UserSerializer
+	
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     permission_classes = [permissions.IsAuthenticated, ]
@@ -202,11 +201,16 @@ class ChangePassword(generics.UpdateAPIView):
     serializer_class = ChangePasswordSerializer
     lookup_field = 'username'
 
+class ResetPassword(generics.UpdateAPIView):
+    queryset = User.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = ResetPasswordSerializer
+    lookup_field = 'username'
+
 class CustomerList(generics.ListAPIView):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
     permission_classes = [permissions.IsAuthenticated]
-
 
     def get_queryset(self):
         store = Store.objects.get(store_slug=self.kwargs['store_slug'])
@@ -218,3 +222,9 @@ class CustomerUpdate(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CustomerSerializer
     permission_classes = [permissions.IsAuthenticated]
     lookup_field = 'id'
+
+class SocialApplicationUpdate(generics.RetrieveUpdateDestroyAPIView):
+    queryset = SocialApp.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = SocialApplicationSerializer
+    lookup_field = 'pk'

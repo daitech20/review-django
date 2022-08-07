@@ -6,11 +6,13 @@
 
     <a-layout-content style="padding: 0 50px">
         <a-cascader v-model:value="value" :options="options" placeholder="Please select" :allowClear="false" />            
+        
         <a-table :columns="columns" :data-source="data">
             <template #bodyCell="{ column, record }">
               <template v-if="column.dataIndex === 'name'">
                   <a>{{ record.name }}</a>
               </template>
+              
               <template v-else-if="column.key === 'action'">
                 <span>
                     <a-button type="primary" size="small" @click="showModalEdit(record.id)" >Edit</a-button>
@@ -21,10 +23,12 @@
               </template>
             </template>
         </a-table>
+
         <a-modal v-model:visible="visibleEdit" title="Edit" @ok="handleEdit()" >
           <a-form
             :model="customer"
-            v-bind="layout"
+            :label-col="{ span: 4 }"
+            :wrapper-col="{ span: 16 }"
             name="nest-messages"
             :validate-messages="validateMessages"
             >
@@ -54,11 +58,9 @@
 
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from 'vue';
-import type { CascaderProps } from 'ant-design-vue';
+<script>
 import { notification } from 'ant-design-vue';
-import BaseRequest from '../core/BaseRequest.js'
+import BaseRequest from '@/core/BaseRequest.js'
 
 export default({
     data() {
@@ -80,7 +82,6 @@ export default({
                 phone: '',
                 email: ''
             },
-            layout: {},
             validateMessages: {}
         }
     },
@@ -102,6 +103,7 @@ export default({
                 title: 'Id',
                 dataIndex: 'id',
                 key: 'id',
+                width: '5%'
             },
             {
                 title: 'Full name',
@@ -158,9 +160,6 @@ export default({
             .catch(error=> {
                 this.errors = error.response.data
             });
-
-
-
         },
 
         getCustomer: function() {
@@ -182,12 +181,8 @@ export default({
             });
         },
 
-        showModalEdit: function(id: any) {
+        showModalEdit: function(id) {
             this.id_customer_edit = id
-            this.layout = {
-                labelCol: { span: 4 },
-                wrapperCol: { span: 16 },
-            }
 
             BaseRequest.get('customer/update/' + this.id_customer_edit)
             .then(response => {
@@ -197,6 +192,7 @@ export default({
             .catch(error=> {
                 this.errors = error.response.data
             });
+
             this.visibleEdit = true
         },
 
@@ -213,7 +209,7 @@ export default({
             });
         },
 
-        showModalDelete: function(id: any, name: any) {
+        showModalDelete: function(id, name) {
             this.id_customer_del = id
             this.name_customer_del = name
             this.visibleDelete = true

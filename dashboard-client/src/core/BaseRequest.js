@@ -1,42 +1,70 @@
 import axios from "axios";
-const apiUrl = 'http://localhost:8088/api/';
+import authService from '../services/review_app/auth.service';
+import { authStore } from '../store/auth.store';
+import { mapActions, mapState } from 'pinia';
+const apiUrl = import.meta.env.VITE_API_BASE_URL.trimEnd('/')+'/api/';
 
 export default {
+    ...mapActions(authStore, ['setAccessToken', 'clearAccessToken', 'clearRefreshToken', 'clearUser']),
+    ...mapState(authStore, ['user', 'accessToken', 'refreshToken']),
+
     getHeaders() {
-        let token = window.localStorage.getItem('token');
-        if (token == null) {
+        if (this.user() === null) {
             return {}
         }
-        return { Authorization: 'Bearer ' + token }
+
+        return authService.checkExpriedToken(this.user().username)
+        .then(response => {
+            return { Authorization: 'Bearer ' + this.accessToken() }
+        })
+        .catch(error => {
+            return authService.refreshToken(this.refreshToken())
+            .then(response => {
+                this.setAccessToken(response.data.access)
+                return { Authorization: 'Bearer ' + response.data.access }
+            })
+            .catch(error => {
+                this.clearAccessToken()
+                this.clearRefreshToken()
+                this.clearUser()
+                return {}
+            })
+            
+        })
+
     },
 
-    get(url) {
+    async get(url) {
+        const header = await this.getHeaders()
         return axios.get(
             apiUrl + url,
-            { headers: this.getHeaders() }
+            { headers: header}
         );
     },
 
-    post(url, data) {
+    async post(url, data) {
+        const header = await this.getHeaders()
         return axios.post(
             apiUrl + url,
             data,
-            { headers: this.getHeaders() }
+            { headers: header }
         );
     },
 
-    put(url, data) {
+    async put(url, data) {
+        const header = await this.getHeaders()
         return axios.put(
             apiUrl + url,
             data,
-            { headers: this.getHeaders() }
+            { headers: header }
         );
     },
 
-    delete(url) {
+    async delete(url) {
+        const header = await this.getHeaders()
         return axios.delete(
             apiUrl + url,
-            { headers: this.getHeaders() }
+            { headers: header }
         );
     }
 }
