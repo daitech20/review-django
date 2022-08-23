@@ -31,8 +31,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import BaseRequest from '../core/BaseRequest.js'
+import BaseRequest from '@/core/BaseRequest'
 import { notification } from 'ant-design-vue';
 
 

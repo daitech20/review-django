@@ -8,7 +8,7 @@
                 <a-icon name="PieChartOutlined"></a-icon>
                 <router-link class="menu-link" :to="{name: 'dashboard'}">Dashboard</router-link>
             </a-menu-item>
-            <a-menu-item key="account" v-if="user.is_superuser">
+            <a-menu-item key="account" v-if="user && user.is_superuser">
                 <a-icon name="UserOutlined"></a-icon>
                 <router-link class="menu-link" :to="{name: 'account'}">Account</router-link>
             </a-menu-item>

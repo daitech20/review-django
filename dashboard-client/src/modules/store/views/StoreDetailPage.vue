@@ -43,9 +43,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive } from 'vue';
-import BaseRequest from '../core/BaseRequest.js'
-import { notification } from 'ant-design-vue';
+
+import BaseRequest from '@/core/BaseRequest'
+import { notification } from 'ant-design-vue'
 
 export default({
     data() {
