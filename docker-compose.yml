@@ -43,6 +43,7 @@ services:
           bash -c "
           ln -sf /usr/src/app/.docker/apache/ports.conf /etc/apache2/ports.conf
           && ln -sf /usr/src/app/.docker/apache/apache2.conf /etc/apache2/apache2.conf
+          && ln -sf /usr/src/app/.env /usr/src/app/server/store/.env
           && service apache2 start
           && python server/manage.py runserver 0.0.0.0:8000"
     depends_on:
