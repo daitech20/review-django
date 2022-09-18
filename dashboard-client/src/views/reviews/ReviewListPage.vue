@@ -1,27 +1,32 @@
 <template>
-    <a-page-header
-    style="border: 1px solid rgb(235, 237, 240)"
-    title="Reviews"
-    sub-title="This is a reviews of store " />
-    <a-layout-content style="padding: 0 50px">
-    <a-cascader v-model:value="value" :options="options" placeholder="Please select" :allowClear="false" />
-        <a-table :columns="columns" :data-source="data">
-            <template #bodyCell="{ column, record }">
-              <template v-if="column.dataIndex === 'name'">
-                  <a>{{ record.name }}</a>
-              </template>
-              <template v-if="column.dataIndex === 'score'">
-                  <a-icon v-for="key in record.score" :key="key" name="StarOutlined" :style="{color: 'yellow'}" fill="currentColor"></a-icon>
-              </template>
-            </template>
-        </a-table>
-    </a-layout-content>
+    <div>
+		<a-page-header
+		style="border: 1px solid rgb(235, 237, 240)"
+		title="Reviews"
+		sub-title="This is a reviews of store " />
+
+		<a-layout-content style="padding: 0 50px">
+			<a-cascader v-model:value="value" :options="options" placeholder="Please select" :allowClear="false" />
+
+			<a-table :columns="columns" :data-source="data">
+				<template #bodyCell="{ column, record }">
+				<template v-if="column.dataIndex === 'name'">
+					<a>{{ record.name }}</a>
+				</template>
+				<template v-if="column.dataIndex === 'score'">
+					<star-outlined v-for="key in record.score" :key="key" :style="{color: 'yellow'}" fill="currentColor"/>
+				</template>
+				</template>
+			</a-table>
+		</a-layout-content>
+	</div>
 </template>
 
 <script>
 import BaseRequest from '@/core/BaseRequest.js'
 import { authStore } from '@/store/auth.store';
 import { mapState } from 'pinia'
+import { StarOutlined } from '@ant-design/icons-vue'
 
 export default({
 	data() {
@@ -148,6 +153,10 @@ export default({
 				this.errors = error.response.data
 			});
 		}
+	},
+
+	components: {
+		StarOutlined
 	}
 })
 

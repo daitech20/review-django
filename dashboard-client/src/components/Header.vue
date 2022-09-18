@@ -5,7 +5,7 @@
                 <a-space :size="15">
                     <a-dropdown placement="bottomRight">
                         <a class="ant-dropdown-link" @click.prevent>
-                            <a-icon name="AppstoreOutlined" />
+                            <appstore-outlined/>
                         </a>
 
                         <template #overlay>
@@ -19,7 +19,7 @@
 
                     <a-dropdown placement="bottomRight">
                         <a class="ant-dropdown-link" @click.prevent>
-                            <a-icon name="BellOutlined" />
+                            <bell-outlined/>
                         </a>
 
                         <template #overlay>
@@ -29,7 +29,7 @@
 
                     <a-dropdown placement="bottomRight">
                         <a class="ant-dropdown-link" @click.prevent>
-                            <a-icon name="MailOutlined" />
+                            <mail-outlined/>
                         </a>
 
                         <template #overlay>
@@ -63,6 +63,7 @@
 <script>
 import { authStore } from '../store/auth.store'
 import { mapActions, mapState } from 'pinia'
+import { AppstoreOutlined, BellOutlined, MailOutlined } from '@ant-design/icons-vue'
 
 export default {
 
@@ -78,6 +79,10 @@ export default {
             this.clearUser()
             this.$router.push({path: 'login'})
         }
+    },
+
+    components: {
+        AppstoreOutlined, BellOutlined, MailOutlined
     }
 }
 </script>

@@ -5,34 +5,34 @@
         </div>
         <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline">
             <a-menu-item key="dashboard">
-                <a-icon name="PieChartOutlined"></a-icon>
+                <pie-chart-outlined/>
                 <router-link class="menu-link" :to="{name: 'dashboard'}">Dashboard</router-link>
             </a-menu-item>
 
-            <a-menu-item key="account" v-if="user.is_superuser">
-                <a-icon name="UserOutlined"></a-icon>
+            <a-menu-item key="account" v-if="user && user.is_superuser">
+                <user-outlined/>
                 <router-link class="menu-link" :to="{name: 'account.list'}">Account</router-link>
             </a-menu-item>
 
             <a-menu-item key="review.list">
-                <a-icon name="MessageOutlined"></a-icon>
+                <message-outlined/>
                 <router-link class="menu-link" :to="{name: 'review.list'}">Review</router-link>
             </a-menu-item>
 
             <a-menu-item key="customer.list">
-                <a-icon name="UserOutlined"></a-icon>
+                <user-outlined/>
                 <router-link class="menu-link" :to="{name: 'customer.list'}">Customer</router-link>
             </a-menu-item>
 
             <a-menu-item key="store.list">
-                <a-icon name="ShopOutlined"></a-icon>
+                <shop-outlined/>
                 <router-link class="menu-link" :to="{name: 'store.list'}">Store</router-link>
             </a-menu-item>
 
-            <a-sub-menu key="setting" v-if="user.is_superuser">
+            <a-sub-menu key="setting" v-if="user && user.is_superuser">
                 <template #title>
                     <span>
-                        <a-icon name="SettingOutlined"></a-icon>
+                        <setting-outlined/>
                         <span>Settings</span>
                     </span>
                 </template>
@@ -44,7 +44,7 @@
                 </a-menu-item>
             </a-sub-menu>
             <a-menu-item key="support_center">
-                <a-icon name="WhatsAppOutlined"></a-icon>
+                <whats-app-outlined/>
                 <router-link class="menu-link" :to="{name: 'support_center'}">Support Center</router-link>
             </a-menu-item>
         </a-menu>
@@ -56,6 +56,7 @@ import { mapActions } from 'pinia'
 import { appearance } from '../store/appearance'
 import { asset } from '../helpers'
 import BaseRequest from '../core/BaseRequest.js'
+import { PieChartOutlined, UserOutlined, MessageOutlined, ShopOutlined, SettingOutlined, WhatsAppOutlined } from '@ant-design/icons-vue'
 
 export default {
     data() {
@@ -85,7 +86,7 @@ export default {
     updated() {
         this.getListStore()
     },
-    
+
     methods: {
         ...mapActions(appearance, ['isSidebarCollapased', 'setSidebarCollapsed']),
 
@@ -99,6 +100,11 @@ export default {
                 console.log(this.error)
             });
         }
+    },
+
+    components: {
+        PieChartOutlined, UserOutlined, MessageOutlined, ShopOutlined,
+        SettingOutlined, WhatsAppOutlined
     }
 
 }

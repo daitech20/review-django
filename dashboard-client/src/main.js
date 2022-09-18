@@ -10,7 +10,6 @@ import router from './routes'
 const app = createApp(App)
 app.use(createPinia())
 app.use(Antd)
-//app.component('a-icon', AntdIcon)
 app.use(router)
 
 if (parseInt(import.meta.env.VITE_ENABLE_MOCKING) === 1) {

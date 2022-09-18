@@ -10,7 +10,7 @@
                 <div class="form-item">
                     <div class="form-item__content">
                         <span class="icon-container">
-                            <a-icon name="UserOutlined" > </a-icon>
+                            <user-outlined/>
                         </span>
                         <div class="input-transform-lowercase">
                             <input placeholder="Store" type="text" class="input__inner" v-model="credentials.username" name="username" required>
@@ -21,7 +21,7 @@
                 <div class="form-item">
                     <div class="form-item__content">
                         <span class="icon-container">
-                            <a-icon name="UnlockOutlined" > </a-icon>
+                            <unlock-outlined/>
                         </span>
                         <div class="input-transform-lowercase">
                             <input placeholder="Password" type="password" class="input__inner" v-model="credentials.password" name="password" required>
@@ -44,6 +44,7 @@ import authService from '@/services/review_app/auth.service';
 import { authStore } from '@/store/auth.store';
 import { mapActions } from 'pinia';
 import { notification } from 'ant-design-vue';
+import { UserOutlined, UnlockOutlined } from '@ant-design/icons-vue'
 
 
 export default {
@@ -79,6 +80,10 @@ export default {
                 description: 'User Name or Password is not correct! '
             });
         }
+    },
+
+    components: {
+        UserOutlined, UnlockOutlined
     }
 }
 
