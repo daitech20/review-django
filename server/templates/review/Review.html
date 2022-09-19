@@ -27,7 +27,7 @@
                     <img class="review-header-img" src="{{ store.logo }}" alt="nailspa">
                 </div>
                 <span class="review-content">
-                    {{ store.message }}
+                    {{ store.message | safe| linebreaks }}
                 </span>
                 <div class="rating-container">
                     <div class="star-container">
@@ -65,10 +65,8 @@
                         <img class="google-img" src="{% static 'review/assets/img/google.svg' %}" alt="google">
                         <span class="login-text">Sign in with Google</span>
                     </button>
-                    <span class="review-google-description"> Sign in with your Google Account to write a
-                        <span class="bold-text">review on Google,</span>
-                         Your review enters you in for a chance to win a
-                        <span class="bold-text underline-text highlight-text item">$250 gift card</span>
+                    <span class="review-google-description">
+                        {{ store.message2 | safe| linebreaks }}
                     </span>
                 </form>
             </div>
