@@ -7,7 +7,7 @@
     <a-layout-content style="padding: 0 50px">
         <a-cascader v-model:value="value" :options="options" placeholder="Please select" :allowClear="false" />            
         
-        <a-table :columns="columns" :data-source="data">
+        <a-table :columns="columns" :data-source="data" :scroll="{ x: 1000, y: 500 }">
             <template #bodyCell="{ column, record }">
               <template v-if="column.dataIndex === 'name'">
                   <a>{{ record.name }}</a>

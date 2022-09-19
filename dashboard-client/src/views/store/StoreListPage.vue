@@ -5,10 +5,14 @@
     sub-title="This is a subtitle of stores page" />
     <a-layout-content style="padding: 0 50px">
         <a-button class="editable-add-btn" style="margin-bottom: 8px" @click="handleAdd">Add</a-button>
-        <a-table :columns="columns" :data-source="data">
+        <a-table :columns="columns" :data-source="data" :scroll="{ x: 1000, y: 500 }">
             <template #bodyCell="{ column, record }">
               <template v-if="column.dataIndex === 'name'">
-                  <a>{{ record.name }}</a>
+				<span>
+                  <router-link :to="{ name: 'store.detail', params: { store_slug: record.slug }}" >
+                    <a-button type="primary" size="small"> {{ record.name }}</a-button>
+                  </router-link>    
+                </span>
               </template>
               <template v-else-if="column.key === 'action'">
                 <span>
@@ -78,6 +82,11 @@ export default({
 					ellipsis: true,
 				},
 				{
+					title: 'Store',
+					dataIndex: 'store',
+					key: 'store',
+				},
+				{
 					title: 'Action',
 					dataIndex: 'action',
 					key: 'action',
@@ -95,7 +104,8 @@ export default({
 					title: this.store[key].title,
 					domain: this.store[key].domain,
 					website: this.store[key].website,
-					slug: this.store[key].store_slug
+					slug: this.store[key].store_slug,
+					store: this.store[key].user
 				})
 				}
 			})

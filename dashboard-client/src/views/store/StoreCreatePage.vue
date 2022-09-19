@@ -56,19 +56,27 @@
             </a-form-item>
 
             <a-form-item
-                :name="['message']"
-                label="Message"
-                :rules="[{ required: true, message: 'Please input message!' }]"
-            >
-                <a-textarea v-model:value="store.message" />
-            </a-form-item>
-
-            <a-form-item
                 :name="['url_map_store']"
                 label="Url map"
                 :rules="[{ required: true, message: 'Please input url map review!' }]"
             >
                 <a-input v-model:value="store.url_map_store" />
+            </a-form-item>
+
+            <a-form-item
+                :name="['message']"
+                label="Message"
+                :rules="[{ required: true, message: 'Please input message!' }]"
+            >
+                <ckeditor :editor="editor" v-model="store.message" :config="editorConfig"></ckeditor>
+            </a-form-item>
+
+            <a-form-item
+                :name="['message2']"
+                label="Message 2"
+                :rules="[{ required: true, message: 'Please input message 2!' }]"
+            >
+                <ckeditor :editor="editor" v-model="store.message2" :config="editorConfig"></ckeditor>
             </a-form-item>
 
             <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
@@ -81,6 +89,7 @@
 <script>
 import BaseRequest from '@/core/BaseRequest.js'
 import { notification } from 'ant-design-vue';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 export default({
     data() {
@@ -90,13 +99,16 @@ export default({
                 title: '',
                 logo: '',
                 message: '',
+                message2: '',
                 domain: '',
                 website: '',
                 url_map_store: ''
             },
             validateMessages: {},
-            errors: {
-            }
+            editor: ClassicEditor,
+            // The configuration of the editor.
+            editorConfig: {},
+            errors: {}
         }
     },
 

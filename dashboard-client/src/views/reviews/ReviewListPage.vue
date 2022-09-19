@@ -1,32 +1,30 @@
 <template>
-    <div>
-		<a-page-header
-		style="border: 1px solid rgb(235, 237, 240)"
-		title="Reviews"
-		sub-title="This is a reviews of store " />
+	
+    <a-page-header
+    style="border: 1px solid rgb(235, 237, 240)"
+    title="Reviews"
+    sub-title="This is a reviews of store " />
 
-		<a-layout-content style="padding: 0 50px">
-			<a-cascader v-model:value="value" :options="options" placeholder="Please select" :allowClear="false" />
+    <a-layout-content style="padding: 0 50px">
+    <a-cascader v-model:value="value" :options="options" placeholder="Please select" :allowClear="false" />
+        <a-table :columns="columns" :data-source="data" :scroll="{ x: 1000, y: 500 }">
+            <template #bodyCell="{ column, record }">
+              <template v-if="column.dataIndex === 'name'">
+                  <a>{{ record.name }}</a>
+              </template>
+              <template v-if="column.dataIndex === 'score'">
+				  <i v-for="key in record.score" :key="key" class="bi bi-star-fill" :style="{color: 'yellow'}"></i>
+			  </template>
+            </template>
+        </a-table>
+    </a-layout-content>
 
-			<a-table :columns="columns" :data-source="data">
-				<template #bodyCell="{ column, record }">
-				<template v-if="column.dataIndex === 'name'">
-					<a>{{ record.name }}</a>
-				</template>
-				<template v-if="column.dataIndex === 'score'">
-					<star-outlined v-for="key in record.score" :key="key" :style="{color: 'yellow'}" fill="currentColor"/>
-				</template>
-				</template>
-			</a-table>
-		</a-layout-content>
-	</div>
 </template>
 
 <script>
-import BaseRequest from '@/core/BaseRequest.js'
+import BaseRequest from '@/core/BaseRequest.js';
 import { authStore } from '@/store/auth.store';
-import { mapState } from 'pinia'
-import { StarOutlined } from '@ant-design/icons-vue'
+import { mapState } from 'pinia';
 
 export default({
 	data() {
@@ -153,10 +151,6 @@ export default({
 				this.errors = error.response.data
 			});
 		}
-	},
-
-	components: {
-		StarOutlined
 	}
 })
 

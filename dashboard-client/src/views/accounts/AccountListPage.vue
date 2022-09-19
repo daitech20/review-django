@@ -5,15 +5,11 @@
     sub-title="This is a subtitle of list account page" />
     <a-layout-content style="padding: 0 50px">
         <a-button class="editable-add-btn" style="margin-bottom: 8px" @click="handleAdd">Add</a-button>
-        <a-table :columns="columns" :data-source="data">
+        <a-cascader v-model:value="value" :options="options" placeholder="Please select" :allowClear="false" />
+        <a-table :columns="columns" :data-source="data" :scroll="{ x: 1000, y: 500 }" >
             <template #bodyCell="{ column, record }">
               <template v-if="column.dataIndex === 'username'">
                   <a>{{ record.username }}</a>
-              </template>
-
-              <template v-if="column.dataIndex === 'admin'">
-                  <a v-if="record.admin">Yes</a>
-                  <a v-if="record.admin==false">No</a>
               </template>
 
               <template v-if="column.key === 'action'">
@@ -44,6 +40,8 @@ import BaseRequest from '@/core/BaseRequest.js'
 export default {
     data() {
         return {
+            options: [{'value': 0, 'label': 'admin'}, {'value': 1, 'label': 'store'}],
+			value: [0],
             errors: {},
             data: [],
             columns: [],
@@ -63,6 +61,12 @@ export default {
         this.getData()
     },
 
+    watch: {
+		value: function() {
+		    this.getAccount()
+		}
+	},
+
     methods: { 
         getData: function() {
             this.columns = [
@@ -70,7 +74,7 @@ export default {
                     title: 'Id',
                     dataIndex: 'id',
                     key: 'id',
-                    width: '5%'
+                    width: '5%',
                 },
                 {
                     title: 'User name',
@@ -91,12 +95,7 @@ export default {
                     title: 'Email',
                     dataIndex: 'email',
                     key: 'email',
-                    ellipsis: true
-                },
-                {
-                    title: 'Admin',
-                    dataIndex: 'admin',
-                    key: 'admin',
+                    ellipsis: true,
                 },
                 {
                     title: 'Action',
@@ -111,14 +110,25 @@ export default {
                 this.data = []
 
                 for (let num in this.user) {
-                    this.data.push({
-                        id: this.user[num].id,
-                        username: this.user[num].username,
-                        first_name: this.user[num].first_name,
-                        last_name: this.user[num].last_name,
-                        email: this.user[num].email,
-                        admin: this.user[num].is_superuser
-                    })
+                    if (this.value[0] === 0 && this.user[num].is_superuser) {
+                        this.data.push({
+                            id: this.user[num].id,
+                            username: this.user[num].username,
+                            first_name: this.user[num].first_name,
+                            last_name: this.user[num].last_name,
+                            email: this.user[num].email,
+                        })
+                    }
+
+                    if (this.value[0] === 1 && this.user[num].is_superuser == false) {
+                        this.data.push({
+                            id: this.user[num].id,
+                            username: this.user[num].username,
+                            first_name: this.user[num].first_name,
+                            last_name: this.user[num].last_name,
+                            email: this.user[num].email,
+                        })
+                    }
                 }
             })
             .catch(error=> {
@@ -134,14 +144,25 @@ export default {
                 this.data = []
 
                 for (let num in this.user) {
-                    this.data.push({
-                        id: this.user[num].id,
-                        username: this.user[num].username,
-                        first_name: this.user[num].first_name,
-                        last_name: this.user[num].last_name,
-                        email: this.user[num].email,
-                        admin: this.user[num].is_superuser
-                    })
+                    if (this.value[0] === 0 && this.user[num].is_superuser) {
+                        this.data.push({
+                            id: this.user[num].id,
+                            username: this.user[num].username,
+                            first_name: this.user[num].first_name,
+                            last_name: this.user[num].last_name,
+                            email: this.user[num].email,
+                        })
+                    }
+
+                    if (this.value[0] === 1 && this.user[num].is_superuser == false) {
+                        this.data.push({
+                            id: this.user[num].id,
+                            username: this.user[num].username,
+                            first_name: this.user[num].first_name,
+                            last_name: this.user[num].last_name,
+                            email: this.user[num].email,
+                        })
+                    }
                 }
             })
             .catch(error=> {
