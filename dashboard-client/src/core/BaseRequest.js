@@ -2,6 +2,7 @@ import axios from "axios";
 import authService from '../services/review_app/auth.service';
 import { authStore } from '../store/auth.store';
 import { mapActions, mapState } from 'pinia';
+import router from '../routes'
 const apiUrl = import.meta.env.VITE_API_BASE_URL.trimEnd('/')+'/api/';
 
 export default {
@@ -27,6 +28,7 @@ export default {
                 this.clearAccessToken()
                 this.clearRefreshToken()
                 this.clearUser()
+                router.push({ name: 'login'});
                 return {}
             })
             
