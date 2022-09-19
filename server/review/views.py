@@ -22,7 +22,7 @@ from .permissions import IsOwnerOrReadOnly
 
 # Create your views here.
 def Home(request):
-    value = request.COOKIES.get('store_name')
+    value = request.COOKIES.get('store_id')
     print('store', value)
 
     return render(request, 'review/Home.html', {})
@@ -74,7 +74,7 @@ class ReviewPage(View):
                 obj = form2.save(commit=False)
                 data['form2'] = form2
                 response = redirect('/accounts/google/login/')
-                response.set_cookie('store_name', store.store_name)
+                response.set_cookie('store_id', store.id)
                 response.set_cookie('review_score', obj.review_score)
                 return response
             else:
@@ -90,9 +90,9 @@ def LoginSuccess(request):
     data = SocialAccount.objects.filter(user=request.user)[0].extra_data
     social_account = User.objects.filter(email=data.get('email')).last()
     social_account.delete()
-    store_name = request.COOKIES.get('store_name')
+    store_id = request.COOKIES.get('store_id')
     review_score = request.COOKIES.get('review_score')
-    store = Store.objects.get(store_name=store_name)
+    store = Store.objects.get(id=store_id)
     customer = store.customer.filter(email=data.get('email'))
     if not customer:
         customer = Customer.objects.create(full_name=data.get('name'), email=data.get('email'))
