@@ -15,6 +15,7 @@ class Store(models.Model):
     logo = models.CharField(max_length=255)
     title = models.CharField(max_length=50)
     message = models.TextField()
+	message2 = models.TextField(blank=True, unique=True)
     domain = models.CharField(max_length=50)
     website = models.CharField(max_length=50)
     url_map_store = models.TextField()
