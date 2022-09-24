@@ -22,6 +22,14 @@
               </button>
               </div>
             {% endif %}
+            {% if error %}
+              <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ error }}
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+              </div>
+            {% endif %}
             <div class="review-container">
                 <div class="review-header">
                     <img class="review-header-img" src="{{ store.logo }}" alt="nailspa">
@@ -48,7 +56,7 @@
                         </div>
                     </div>
                 </div>
-                <form action="{% url 'review:ReviewPage' store.store_slug %}" class="complain-container" method="post" enctype="multipart/form-data">
+                <form action="{% url 'review:ReviewPage' store.store_slug %}?props={{ customer_id }}" class="complain-container" method="post" enctype="multipart/form-data">
 <!--                    <textarea class="review-area" placeholder="Write review to help us better"></textarea>-->
 <!--                    <input class="review-input"  type="text" placeholder="Phone number (optional)">-->
                     {% csrf_token %}
@@ -58,7 +66,7 @@
                    <button type="submit" class="btn-submit" name="btnform">Submit</button>
                 </form>
 
-                <form action="{% url 'review:ReviewPage' store.store_slug %}" class="review-google-container" method="post" enctype="multipart/form-data">
+                <form action="{% url 'review:ReviewPage' store.store_slug %}?props={{ customer_id }}" class="review-google-container" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     {{ form2.review_score  }}
                     <button class="login-google-button" type="submit" name="btnform2" >
@@ -143,7 +151,7 @@
         document.getElementById("id_review_score2").value = "5";
     });
 
-    var message = document.getElementsByClassName("alert").length;
+    var message = document.getElementsByClassName("alert-success").length;
 
     if (message) {
         setTimeout(function(){
