@@ -29,18 +29,23 @@ def Home(request):
 
 class ReviewPage(View):
     def get(self, request, store_slug):
+        customer_id = request.GET.get('props', None)
+        print('get', customer_id)
         store = Store.objects.get(store_slug=store_slug)
         form = ReviewForm(initial={'review_score': 0})
         form2 = ReviewFormGoogle(initial={'review_score': 0})
         data = {
             'store': store,
             'form': form,
-            'form2': form2
+            'form2': form2,
+            'customer_id': customer_id
         }
 
         return render(request, 'review/Review.html', data)
 
     def post(self, request, store_slug):
+        customer_id = request.GET.get('props', None)
+        print('post', customer_id)
         store = Store.objects.get(store_slug=store_slug)
         form = ReviewForm(initial={'review_score': 0})
         form2 = ReviewFormGoogle(initial={'review_score': 0})
@@ -56,16 +61,33 @@ class ReviewPage(View):
                 obj = form.save(commit=False)
                 review = Review.objects.create(store=store, review_content=obj.review_content, phone_number=obj.phone_number, review_score=obj.review_score)
                 review.save()
-                customer = store.customer.filter(phone=obj.phone_number)
-                if not customer:
-                    customer = Customer.objects.create(phone=obj.phone_number)
+                if (customer_id != 'None'):
+                    try:
+                        customer = Customer.objects.get(id=customer_id)
+                        review.customer_name = customer.full_name
+                        review.review_email = customer.email
+                        review.phone_number = customer.phone
+                        review.save()
+                        store.customer.add(customer)
+                        store.save()
+                        data['form'] = form
+                        data['message'] = "Thanks you for review!"
+                    except:
+                        data['error'] = "Customer isn't valid!"
                 else:
-                    customer = customer[0]
-                store.customer.add(customer)
-                store.save()
+                    customer = store.customer.filter(phone=obj.phone_number)
+                    if not customer:
+                        customer = Customer.objects.create(phone=obj.phone_number)
+                    else:
+                        customer = customer[0]
+                        review.customer_name = customer.full_name
+                        review.review_email = customer.email
+                        review.save()
 
-                data['form'] = form
-                data['message'] = "Thanks you for review!"
+                    store.customer.add(customer)
+                    store.save()
+                    data['form'] = form
+                    data['message'] = "Thanks you for review!"
             else:
                 form = ReviewForm(initial={'review_score': 0})
         elif 'btnform2' in request.POST:
@@ -76,6 +98,7 @@ class ReviewPage(View):
                 response = redirect('/accounts/google/login/')
                 response.set_cookie('store_id', store.id)
                 response.set_cookie('review_score', obj.review_score)
+                response.set_cookie('customer_id', customer_id)
                 return response
             else:
                 form2 = ReviewForm(initial={'review_score': 0})
@@ -92,15 +115,29 @@ def LoginSuccess(request):
     social_account.delete()
     store_id = request.COOKIES.get('store_id')
     review_score = request.COOKIES.get('review_score')
+    customer_id = request.COOKIES.get('customer_id')
     store = Store.objects.get(id=store_id)
-    customer = store.customer.filter(email=data.get('email'))
-    if not customer:
-        customer = Customer.objects.create(full_name=data.get('name'), email=data.get('email'))
-    else:
-        customer = customer[0]
+    
+    if (customer_id != 'None'):
+        try:
+            customer = Customer.objects.get(id=customer_id)
+            customer.email = data.get('email')
+            customer.save()
+            store.customer.add(customer)
+            store.save()
+        except:
+            pass
 
-    store.customer.add(customer)
-    store.save()
+    else:
+        customer = store.customer.filter(email=data.get('email'))
+        if not customer:
+            customer = Customer.objects.create(full_name=data.get('name'), email=data.get('email'))
+        else:
+            customer = customer[0]
+
+        store.customer.add(customer)
+        store.save()
+
     review = Review.objects.create(store=store, review_score=review_score, customer_name=data.get('name'), review_email=data.get('email'))
     review.save()
 
