@@ -58,7 +58,7 @@
                     <div class="space-align-container">
                         <a-image
                             :width="200"
-                            href="/staticfiles/example.png"
+                            :src="guideImage"
                             style="padding:10px"
                         />
                         <a-space direction="vertical" style="width: 100%" size="large">
@@ -143,7 +143,7 @@ import { notification } from 'ant-design-vue';
 import BaseRequest from '@/core/BaseRequest.js'
 import { UploadOutlined, StarFilled, MailFilled } from '@ant-design/icons-vue';
 import jQuery from 'jquery'
-
+import { asset } from '../../helpers'
 
 
 export default({
@@ -175,7 +175,8 @@ export default({
             content: {
                 message: '',
             },
-            characters: ['{{review_link}}', '{{full_name}}']
+            characters: ['{{review_link}}', '{{full_name}}'],
+            guideImage: asset('example.png'),
         }
     },
 
