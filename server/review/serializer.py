@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
-from .models import Review, Store, Customer
+from .models import Review, Store, Customer, MessageLog
 import django.contrib.auth.password_validation as validators
 from django.core import exceptions
 from allauth.socialaccount.models import SocialApp
@@ -125,6 +125,21 @@ class CustomerSerializer(serializers.ModelSerializer):
         model = Customer
         fields = '__all__'
 
+class AddCustomerStoreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer
+        fields = ('__all__')
+    
+    # def create(self, validated_data):
+    #     customers = validated_data.pop('customer')
+
+    #     print(customers)
+    #     store = Store.objects.get(store_slug=validated_data.pop('store_slug'))
+    #     return store
+    def create(self, validated_data):
+       
+        return super().create(validated_data)
+
 class ChangePasswordSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
     new_password1 = serializers.CharField(write_only=True, required=True)
@@ -210,3 +225,8 @@ class SocialApplicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = SocialApp
         fields = ['name', 'client_id', 'secret']
+
+class MessageLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MessageLog
+        fields = ['content',]

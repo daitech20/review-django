@@ -2,7 +2,7 @@ from django.shortcuts import render
 from allauth.socialaccount.models import SocialAccount
 from django.views import View, generic
 from rest_framework import generics, status
-from .models import Review, Store, Customer
+from .models import Review, Store, Customer, MessageLog
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.socialaccount.models import SocialApp
 from .form import ReviewForm, ReviewFormGoogle
@@ -13,12 +13,24 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import generics, status
 from .serializer import CustomJWTSerializer, ReviewSerializer, StoreSerializer, RegisterSerializer,\
     UpdateStoreSerializer, DetailStoreSerializer, UserSerializer, ChangePasswordSerializer,\
-    CustomerSerializer, ResetPasswordSerializer, SocialApplicationSerializer
+    CustomerSerializer, ResetPasswordSerializer, SocialApplicationSerializer, AddCustomerStoreSerializer, MessageLogSerializer
 from rest_framework import permissions
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from .permissions import IsOwnerOrReadOnly
+from .apps.sendmess import send_mess
+from pathlib import Path
+import os
+import environ
+from threading import Thread
+import threading
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+env = environ.Env()
+# reading .env file
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Create your views here.
 def Home(request):
@@ -194,7 +206,6 @@ class StoreUpdate(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
     lookup_field = 'store_slug'
 
-	
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()
     permission_classes = [permissions.IsAuthenticated, ]
@@ -254,6 +265,31 @@ class CustomerList(generics.ListAPIView):
         customers = store.customer.all().order_by('-id')
         return customers
 
+class StoreAddCustomer(generics.CreateAPIView):
+    queryset = Customer
+    serializer_class = CustomerSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        store_slug=self.kwargs['store_slug']
+        store = Store.objects.get(store_slug=store_slug)
+        if isinstance(data, list):
+            serializer = self.get_serializer(data=request.data)
+        else:
+            serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            customer = store.customer.get(phone=serializer.data['phone'])
+            customer.full_name = serializer.data['full_name']
+            customer.email = serializer.data['email']
+            customer.save()
+        except:
+            customer = Customer.objects.create(phone=serializer.data['phone'], full_name=serializer.data['full_name'], email=serializer.data['email'])
+            store.customer.add(customer)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 class CustomerUpdate(generics.RetrieveUpdateDestroyAPIView):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
@@ -265,3 +301,81 @@ class SocialApplicationUpdate(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = SocialApplicationSerializer
     lookup_field = 'pk'
+
+class SendAllMessage(generics.CreateAPIView):
+    queryset = MessageLog
+    serializer_class = MessageLogSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        store_slug=self.kwargs['store_slug']
+        store = Store.objects.get(store_slug=store_slug)
+        
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+    
+        def send_mess_thread(customer):
+            content = serializer.data['content']
+            content = content.replace('{{review_link}}', str(store.domain) + store_slug + '?params=' + str(customer.id))
+            content = content.replace('{{full_name}}', str(customer.full_name))
+
+            try:
+                sid = send_mess(content, customer.phone)
+                message_log = MessageLog.objects.create(store=store)
+                message_log.from_phone = env('FROM_PHONE')
+                message_log.to_phone = customer.phone
+                message_log.content = content
+                message_log.status = 0
+                message_log.sid = sid
+                message_log.save()
+            except:
+                message_log = MessageLog.objects.create(store=store)
+                message_log.from_phone = env('FROM_PHONE')
+                message_log.to_phone = customer.phone
+                message_log.content = content
+                message_log.status = 1
+                message_log.save()
+
+        for customer in store.customer.all():
+            thread = threading.Thread(target=send_mess_thread, args=(customer,))
+            thread.start()
+
+        return Response({'result': 'ok'}, status=status.HTTP_200_OK)
+    
+class SendMessage(generics.CreateAPIView):
+    queryset = MessageLog
+    serializer_class = MessageLogSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        store_slug = self.kwargs['store_slug']
+        customer_id = self.kwargs['customer_id']
+        store = Store.objects.get(store_slug=store_slug)
+        customer = store.customer.get(id=customer_id)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True) 
+        content = serializer.data['content']
+        content = content.replace('{{review_link}}', str(store.domain) + store_slug + '?params=' + str(customer.id))
+        content = content.replace('{{full_name}}', str(customer.full_name))
+
+        try:
+            sid = send_mess(content, customer.phone)
+            message_log = MessageLog.objects.create(store=store)
+            message_log.from_phone = env('FROM_PHONE')
+            message_log.to_phone = customer.phone
+            message_log.content = content
+            message_log.status = 0
+            message_log.sid = sid
+            message_log.save()
+        except:
+            message_log = MessageLog.objects.create(store=store)
+            message_log.from_phone = env('FROM_PHONE')
+            message_log.to_phone = customer.phone
+            message_log.content = content
+            message_log.status = 1
+            message_log.save()
+
+        return Response({'result': 'ok'}, status=status.HTTP_200_OK)
+ 

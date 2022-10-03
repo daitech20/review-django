@@ -2,7 +2,7 @@ from django.urls import path, include
 from .views import Home, ReviewPage, LoginSuccess, MyTokenObtainPairView,\
     ReviewList, StoreList, RegisterView, StoreDetail, StoreUpdate, UserDetail,\
     ChangePassword, CustomerList, CustomerUpdate, StoreCreate, UserList,\
-    ResetPassword, SocialApplicationUpdate
+    ResetPassword, SocialApplicationUpdate, StoreAddCustomer, SendAllMessage, SendMessage
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -24,8 +24,11 @@ urlpatterns = [
     path('api/store/create/', StoreCreate.as_view(), name='create_store'),
     path('api/store/detail/<slug:store_slug>/', StoreDetail.as_view(), name='detail_store'),
     path('api/store/update/<slug:store_slug>', StoreUpdate.as_view(), name='update_store'),
+    path('api/store/addCustomer/<slug:store_slug>', StoreAddCustomer.as_view(), name='add_customer'),
     path('api/customer/<slug:store_slug>/', CustomerList.as_view(), name='list_customer'),
     path('api/customer/update/<int:id>/', CustomerUpdate.as_view(), name='update_customer'),
     path('api/register/', RegisterView.as_view()),
     path('api/social/application/<int:pk>/', SocialApplicationUpdate.as_view(), name='update_social_application'),
+    path('api/sendMessage/<slug:store_slug>/', SendAllMessage.as_view(), name='send_all_message'),
+    path('api/sendMessage/<slug:store_slug>/<str:customer_id>/', SendMessage.as_view(), name='send_message'),
 ]
