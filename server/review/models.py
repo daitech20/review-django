@@ -12,7 +12,7 @@ STATUS_MESSAGE = (
 
 class Customer(models.Model):
     full_name = models.CharField(max_length=55, null=True, blank=True)
-    phone = models.CharField(max_length=11, null=True, blank=True)
+    phone = models.CharField(max_length=12, null=True, blank=True)
     email = models.CharField(max_length=55, null=True, blank=True)
 
 class Store(models.Model):
