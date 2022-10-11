@@ -2,6 +2,7 @@
 staticfiles/dashboard/dist
 staticfiles/server
 server/.idea
+server/review/migrations
 .idea
 .vscode
 **/__pycache__/

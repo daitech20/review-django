@@ -8,7 +8,7 @@
         <div class="feature">
             <a-cascader v-model:value="value" :options="options" placeholder="Please select" :allowClear="false" />            
             <a-button type="primary" style="margin-left:10px;" @click="showModalAdd" >Add</a-button>
-            <a-button type="primary" style="margin-left:10px;" @click="showModalSendMessage">
+            <a-button type="primary" style="margin-left:10px;" @click="showModalSendMessage(null)">
                 <mail-filled />
             </a-button>
         </div>
@@ -19,12 +19,19 @@
               </template>
               
               <template v-else-if="column.key === 'action'">
-                <span>
-                    <a-button type="primary" size="small" @click="showModalEdit(record.id)" >Edit</a-button>
-                </span>
-                <span>
-                    <a-button type="primary" danger size="small" @click="showModalDelete(record.id, record.name)">Delete</a-button>
-                </span>
+                <div class="action">
+                    <span>
+                        <a-button type="primary" size="small" @click="showModalEdit(record.id)" >Edit</a-button>
+                    </span>
+                    <span>
+                        <a-button type="primary" size="small" @click="showModalSendMessage(record.id)">
+                            <mail-filled />
+                        </a-button>
+                    </span>
+                    <span>
+                        <a-button type="primary" danger size="small" @click="showModalDelete(record.id, record.name)">Delete</a-button>
+                    </span>
+                </div>
               </template>
             </template>
         </a-table>
@@ -111,9 +118,9 @@
           </p>
         </a-modal>
 
-        <a-modal v-model:visible="visibleSendMessage" title="Message" @ok="handleSendMessage()" >
+        <a-modal v-model:visible="visibleSendMessage" :title="this.getTitle()"  @ok="handleSendMessage()" >
           <a-form
-            :model="content"
+            :model="message"
             :label-col="{ span: 24 }"
             :wrapper-col="{ span: 24 }"
             name="nest-messages"
@@ -126,8 +133,8 @@
                     </a-space>
                 </div>
 
-                <a-form-item :name="['message']">
-                    <a-textarea v-model:value="content.message" />
+                <a-form-item :name="['content']">
+                    <a-textarea v-model:value="message.content" />
                 </a-form-item>
 
             </a-form>
@@ -162,6 +169,7 @@ export default({
             customers: [],
             id_customer_edit: '',
             id_customer_del: '',
+            id_customer_send_mess: '',
             name_customer_del: '',
             customer: {
                 full_name: '',
@@ -172,9 +180,10 @@ export default({
             activeKey: '1',
             fileList: [],
             lines_file: [],
-            content: {
-                message: '',
+            message: {
+                content: '',
             },
+            quantity: false,
             characters: ['{{review_link}}', '{{full_name}}'],
             guideImage: asset('example.png'),
         }
@@ -275,9 +284,64 @@ export default({
             });
         },
 
-        showModalSendMessage: function() {
-            this.content.message = ''
+        showModalSendMessage: function(id_customer_send_mess: any) {
+            this.message.content = ''
             this.visibleSendMessage = true
+            this.id_customer_send_mess = id_customer_send_mess
+            if (this.id_customer_send_mess == null) {
+                this.quantity = true
+            }
+            else this.quantity = false
+
+        },
+
+        handleSendMessage: function() {
+            if (this.id_customer_send_mess == null) {
+                BaseRequest.post('sendMessage/' + this.value[0] + '/', this.message)
+                .then(response => {
+                    notification['success']({
+                        message: 'Send mail!',
+                        description: this.customers.length + ' emails have been sent',
+                    });
+                })
+                .catch(error=> {
+                    this.errors = error.response.data
+                    console.log(this.errors)
+                    notification['error']({
+                        message: 'Send mess error!',
+                        description: 'Error.',
+                    });
+                });
+            }
+            else {
+                BaseRequest.post('sendMessage/' + this.value[0] + '/' + this.id_customer_send_mess + '/', this.message)
+                .then(response => {
+                    notification['success']({
+                        message: 'Send mail!',
+                        description: 'Send mail success',
+                    });
+                })
+                .catch(error=> {
+                    this.errors = error.response.data
+                    console.log(this.errors)
+                    notification['error']({
+                        message: 'Send mess error!',
+                        description: 'Error.',
+                    });
+                });
+            }
+            this.visibleSendMessage = false
+        },
+
+        getTitle: function() {
+            if (this.quantity)
+                return 'Message (' + this.customers.length + ')'
+            else {
+                var temp = this.data.find(x => x.id == this.id_customer_send_mess)
+                if (temp == null)
+                    return 'Undefined'
+            return  'Message ' + temp.name 
+            }
         },
 
         showModalAdd: function() {
@@ -299,7 +363,7 @@ export default({
                     this.errors = error.response.data
                     notification['error']({
                         message: 'Add error!',
-                        description: 'Error.',
+                        description: this.errors.phone,
                     });
                 });
             }
@@ -436,10 +500,10 @@ export default({
 
         insertText: function(value: any) {
             const $ = jQuery;
-            var cursorPosition = $('#nest-messages_message').prop("selectionStart");
+            var cursorPosition = $('#nest-messages_content').prop("selectionStart");
 
-            let result = this.content.message.slice(0, cursorPosition )  + this.characters[value] + this.content.message.slice(cursorPosition)            
-            this.content.message = result
+            let result = this.message.content.slice(0, cursorPosition )  + this.characters[value] + this.message.content.slice(cursorPosition)            
+            this.message.content = result
         }
     },
 
@@ -467,6 +531,10 @@ export default({
   flex-wrap: wrap;
   align-content: space-around;
   justify-content: center;
+}
+
+.action span {
+    margin: 2px;
 }
 
 </style>
