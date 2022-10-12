@@ -376,7 +376,7 @@ class SendMessage(generics.CreateAPIView):
             sid = send_mess(content, customer.phone)
             message_log = MessageLog.objects.create(store=store)
             message_log.from_phone = env('FROM_PHONE')
-            message_log.to_phone = customer.phone
+            message_log.to_phone = str(customer.phone)
             message_log.content = content
             message_log.status = 0
             message_log.sid = sid
@@ -384,7 +384,7 @@ class SendMessage(generics.CreateAPIView):
         except:
             message_log = MessageLog.objects.create(store=store)
             message_log.from_phone = env('FROM_PHONE')
-            message_log.to_phone = customer.phone
+            message_log.to_phone = str(customer.phone)
             message_log.content = content
             message_log.status = 1
             message_log.save()
