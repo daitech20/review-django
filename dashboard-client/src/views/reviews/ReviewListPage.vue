@@ -34,9 +34,7 @@ export default({
 			columns: [],
 			reviews: [],
 			store: [],
-			errors: {
-
-			},
+			errors: {},
 			data: [],
 			visible: false,
 		}

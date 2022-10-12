@@ -15,6 +15,7 @@ import AccountDetailPage from './views/accounts/AccountDetailPage.vue'
 import AccountResetPasswordPage from './views/accounts/AccountResetPasswordPage.vue'
 import AccountChangePasswordPage from './views/accounts/AccountChangePasswordPage.vue'
 import CustomerListPage from './views/customers/CustomerListPage.vue'
+import MessagesListPage from './views/service/MessagesListPage.vue'
 
 const routes = [
     {
@@ -96,6 +97,11 @@ const routes = [
         path: '/dashboard/settings/google-api',
         component: GoogleAPISettingPage
     },
+    {
+        name: 'service.messages.list',
+        path: '/dashboard/service/messages',
+        component: MessagesListPage
+    }
 ]
 
 const router = createRouter({
