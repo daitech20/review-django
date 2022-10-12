@@ -29,6 +29,19 @@
                 <router-link class="menu-link" :to="{name: 'store.list'}">Store</router-link>
             </a-menu-item>
 
+            <a-sub-menu key="service">
+                <template #title>
+                    <span>
+                        <gold-outlined />
+                        <span>Service</span>
+                    </span>
+                </template>
+                <a-menu-item key="service.messages.list">
+                    <message-outlined />    
+                    <router-link class="menu-link" :to="{name: 'service.messages.list'}">Messages Log</router-link>
+                </a-menu-item>
+            </a-sub-menu>
+
             <a-sub-menu key="setting" v-if="user && user.is_superuser">
                 <template #title>
                     <span>
@@ -56,7 +69,7 @@ import { mapActions } from 'pinia'
 import { appearance } from '../store/appearance'
 import { asset } from '../helpers'
 import BaseRequest from '../core/BaseRequest.js'
-import { PieChartOutlined, UserOutlined, MessageOutlined, ShopOutlined, SettingOutlined, WhatsAppOutlined } from '@ant-design/icons-vue'
+import { PieChartOutlined, UserOutlined, MessageOutlined, ShopOutlined, SettingOutlined, WhatsAppOutlined, GoldOutlined } from '@ant-design/icons-vue'
 
 export default {
     data() {
@@ -104,7 +117,7 @@ export default {
 
     components: {
         PieChartOutlined, UserOutlined, MessageOutlined, ShopOutlined,
-        SettingOutlined, WhatsAppOutlined
+        SettingOutlined, WhatsAppOutlined, GoldOutlined
     }
 
 }

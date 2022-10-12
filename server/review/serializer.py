@@ -230,3 +230,8 @@ class MessageLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = MessageLog
         fields = ['content',]
+
+class MessageLogListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MessageLog
+        fields = ('__all__')

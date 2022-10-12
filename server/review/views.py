@@ -13,7 +13,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import generics, status
 from .serializer import CustomJWTSerializer, ReviewSerializer, StoreSerializer, RegisterSerializer,\
     UpdateStoreSerializer, DetailStoreSerializer, UserSerializer, ChangePasswordSerializer,\
-    CustomerSerializer, ResetPasswordSerializer, SocialApplicationSerializer, AddCustomerStoreSerializer, MessageLogSerializer
+    CustomerSerializer, ResetPasswordSerializer, SocialApplicationSerializer, AddCustomerStoreSerializer, MessageLogSerializer, \
+    MessageLogListSerializer
 from rest_framework import permissions
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
@@ -265,6 +266,17 @@ class CustomerList(generics.ListAPIView):
         customers = store.customer.all().order_by('-id')
         return customers
 
+class MessageLogList(generics.ListAPIView):
+    queryset = MessageLog.objects.all()
+    serializer_class = MessageLogListSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        store = Store.objects.get(store_slug=self.kwargs['store_slug'])
+        
+        return qs.filter(store=store).order_by('-created')
+
 class StoreAddCustomer(generics.CreateAPIView):
     queryset = Customer
     serializer_class = CustomerSerializer
@@ -378,4 +390,3 @@ class SendMessage(generics.CreateAPIView):
             message_log.save()
 
         return Response({'result': 'ok'}, status=status.HTTP_200_OK)
- 

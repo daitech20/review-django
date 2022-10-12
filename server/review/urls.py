@@ -2,7 +2,8 @@ from django.urls import path, include
 from .views import Home, ReviewPage, LoginSuccess, MyTokenObtainPairView,\
     ReviewList, StoreList, RegisterView, StoreDetail, StoreUpdate, UserDetail,\
     ChangePassword, CustomerList, CustomerUpdate, StoreCreate, UserList,\
-    ResetPassword, SocialApplicationUpdate, StoreAddCustomer, SendAllMessage, SendMessage
+    ResetPassword, SocialApplicationUpdate, StoreAddCustomer, SendAllMessage, SendMessage, \
+    MessageLogList
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -31,4 +32,6 @@ urlpatterns = [
     path('api/social/application/<int:pk>/', SocialApplicationUpdate.as_view(), name='update_social_application'),
     path('api/sendMessage/<slug:store_slug>/', SendAllMessage.as_view(), name='send_all_message'),
     path('api/sendMessage/<slug:store_slug>/<str:customer_id>/', SendMessage.as_view(), name='send_message'),
+    path('api/messageLog/<slug:store_slug>/', MessageLogList.as_view(), name='message_log_list'),
+
 ]
